@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsdown",
     "changelog": "echo 'Not implemented'",
-    "check": "npm run lint && npm run format:check && npm run typecheck",
+    "check": "npm run test && npm run lint && npm run format:check && npm run typecheck",
     "clean": "rm -rf ./node_modules && rm package-lock.json && rm -rf ./dist",
     "dev": "tsdown --watch",
     "forge:deploy": "source .env && forge deploy --environment \"$FORGE_ENVIRONMENT\"",
@@ -24,14 +24,15 @@
     "forge:variables:set": "source .env && forge variables set --environment \"$FORGE_ENVIRONMENT\"",
     "forge:variables:set:dotenv": "./scripts/forge-vars-from-env.sh",
     "forge:variables:set-encrypted": "source .env && forge variables set --encrypt --environment \"$FORGE_ENVIRONMENT\"",
-    "format": "echo 'Not implemented'",
-    "format:check": "echo 'Not implemented'",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
     "generate": "npm run generate:openapi && npm run generate:rovo",
     "generate:openapi": "echo 'Not implemented'",
     "generate:rovo": "echo 'Not implemented'",
-    "lint": "eslint src/**/*",
-    "lint:check": "echo 'Not implemented'",
-    "lint:fix": "echo 'Not implemented'",
+    "lint": "npm run lint:check && npm run lint:forge",
+    "lint:check": "biome lint .",
+    "lint:forge": "forge lint",
+    "lint:fix": "biome lint --write .",
     "prepare": "echo 'Not implemented'",
     "preview": "echo 'Not implemented'",
     "start": "echo 'Not implemented'",
@@ -57,11 +58,18 @@
     "@biomejs/biome": "2.5.2",
     "@size-limit/preset-app": "^12.1",
     "@types/node": "24",
+    "archunit": "*",
     "lefthook": "^2.1",
     "redocly": "*",
     "size-limit": "^12.1",
     "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep",
     "typescript": "^5.9",
     "vitest": "*"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true,
+    "iframe-resizer@4.4.5": true,
+    "lefthook@2.1.9": true,
+    "redocly@1.0.0": true
   }
 }
