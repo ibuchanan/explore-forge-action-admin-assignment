@@ -11,17 +11,6 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "size-limit": [
-    {
-      "name": "Forge backend action bundle",
-      "path": [
-        "dist/**/*.js",
-        "!dist/frontend/**",
-        "!dist/resolvers/**"
-      ],
-      "limit": "15 kB"
-    }
-  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "changelog": "echo 'Not implemented'",
@@ -43,8 +32,8 @@
     "generate:rovo": "echo 'Not implemented'",
     "lint": "npm run lint:prelint && npm run lint:check && npm run lint:forge",
     "lint:check": "biome lint .",
-    "lint:forge": "forge lint",
     "lint:fix": "biome lint --write .",
+    "lint:forge": "forge lint",
     "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.recommended.yml",
     "prepare": "echo 'Not implemented'",
     "preview": "echo 'Not implemented'",
@@ -83,6 +72,9 @@
     "typescript": "^5.9",
     "vitest": "*"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "allowScripts": {
     "fsevents@2.3.3": true,
     "iframe-resizer@4.4.5": true,
@@ -91,5 +83,16 @@
     "github:ibuchanan/forge-ahead-atlassian-api-types#c1120db3d1b1a2455acd72b05238d3a48226b983": true,
     "github:ibuchanan/forge-ahead-errors#1b89e19c0f9bcf9a0522300684f85869469453ce": true,
     "@ast-grep/cli@0.44.1": true
-  }
+  },
+  "size-limit": [
+    {
+      "name": "Forge backend action bundle",
+      "path": [
+        "dist/**/*.js",
+        "!dist/frontend/**",
+        "!dist/resolvers/**"
+      ],
+      "limit": "15 kB"
+    }
+  ]
 }
