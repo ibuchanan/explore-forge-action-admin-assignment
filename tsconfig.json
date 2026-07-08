@@ -15,6 +15,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": true,
+    "jsx": "react-jsx",
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
 

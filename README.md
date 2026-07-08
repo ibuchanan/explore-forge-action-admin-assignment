@@ -12,11 +12,11 @@ See [Set up Forge](https://developer.atlassian.com/platform/forge/set-up-forge/)
 
 ## Quick start
 
-- Modify your app frontend by editing the `src/frontend/index.jsx` file.
+- Modify your app frontend by editing the `src/frontend/index.tsx` file.
 
-- Modify your app actions by editing the `src/actions/index.js` file.
+- Modify your app actions by editing the `src/actions/index.ts` file.
 
-- Modify your app backend by editing the `src/resolvers/index.js` file to define resolver functions. See [Forge resolvers](https://developer.atlassian.com/platform/forge/runtime-reference/custom-ui-resolver/) for documentation on resolver functions.
+- Modify your app backend by editing the `src/resolvers/index.ts` file to define resolver functions. See [Forge resolvers](https://developer.atlassian.com/platform/forge/runtime-reference/custom-ui-resolver/) for documentation on resolver functions.
 
 - Build and deploy your app by running:
 
