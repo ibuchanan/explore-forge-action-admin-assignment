@@ -26,8 +26,9 @@ if you have questions or feedback.
 - [Atlassian Forge CLI][forge-getting-started], authenticated with an
   Atlassian account. The `forge:*` scripts assume `forge` is available on
   `PATH`.
-- A Confluence Cloud site where the Forge app can be registered, deployed,
-  and installed.
+- An Atlassian Cloud Organization
+  that is the target for admin operations.
+- A Jira Cloud site where the Forge app can be registered, deployed, and installed.
 
 [node-download]: https://nodejs.org/en/download
 [npm-install]: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
@@ -66,15 +67,48 @@ npm run forge:install               # Usually only needed once
 
 The app is configured entirely through Forge environment variables
 (no in-app configuration UI).
-Two are required:
+`ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` is a structured JSON object:
 
-- `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` — a JSON object describing the org,
-  directory, Authorized Initiator emails, and Allowed Groups. See the
-  [spec](docs/admin-access-automation-spec.md#environment-configuration) for
-  the exact schema.
-- `ADMIN_ASSIGNMENT_API_TOKEN` — the Service Credential used to call the
-  Organizations REST API. This must be set as an **encrypted** Forge
-  variable.
+```json
+{
+  "orgId": "organization-id",
+  "directoryId": "directory-id",
+  "authorizedInitiatorEmails": ["alice@example.com", "bob@example.com"],
+  "allowedGroups": [
+    {
+      "key": "jira-admins",
+      "label": "Jira admins",
+      "name": "jira-administrators"
+    },
+    {
+      "key": "support-admins",
+      "label": "Support admins",
+      "name": "support-administrators"
+    }
+  ],
+  "lookup": {
+    "targetUserTimeoutMs": 10000,
+    "targetUserMaxPages": 5,
+    "configResolutionTimeoutMs": 30000,
+    "configResolutionMaxPages": 20
+  }
+}
+```
+
+- `orgId` is required. [Find your organization's Cloud ID][find-org-id].
+- `directoryId` is required. [List your organization's directories][list-directories]
+  to find it — it is not currently shown in the admin.atlassian.com UI.
+- `authorizedInitiatorEmails` is a non-empty JSON array of email strings.
+- `allowedGroups` is a non-empty JSON array.
+- `allowedGroups[*].key` is the stable Runtime Input token for a group.
+- `allowedGroups[*].label` is a human-readable label for logs and summaries.
+- `allowedGroups[*].name` is the exact Atlassian group name to resolve.
+- The app does not enforce a hardcoded maximum number of allowed groups
+  but it is not recommended to use more than a dozen.
+- Lookup budget fields are optional and have conservative defaults.
+
+[find-org-id]: https://confluence.atlassian.com/cloudkb/retrieve-my-atlassian-cloud-organization-s-id-1207189876.html
+[list-directories]: https://developer.atlassian.com/cloud/admin/organization/rest/api-group-directory/
 
 ## Contributing
 
