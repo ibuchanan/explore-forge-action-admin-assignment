@@ -1,0 +1,45 @@
+modules:
+  automation:actionProvider:
+    - key: explore-forge-action-admin-automation-action-provider-ui-kit
+      actions:
+        - automation-action-ui-kit
+  action:
+    - key: automation-action-ui-kit
+      name: Automation action
+      function: add-comment-to-issue
+      description: adds comment on an issue.
+      config:
+        resource: main-resource
+        render: native
+      inputs:
+        issueKey:
+          title: Issue Id
+          type: string
+          description: The issue id for the Jira issue id where a comments needs to be added
+          required: true
+        comment:
+          title: Comment
+          type: string
+          description: The comment that needs to be added to the issue
+          required: true
+      actionVerb: CREATE
+      resolver:
+        function: automation-resolver
+  function:
+    - key: add-comment-to-issue
+      handler: index.addComment
+    - key: automation-resolver
+      handler: index.handler
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/7b5d7c1c-387c-40d8-a530-e16614d64b5b
+resources:
+  - key: main-resource
+    path: src/frontend/index.jsx
+permissions:
+  scopes:
+    - write:jira-work
+    - read:jira-work

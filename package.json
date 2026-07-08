@@ -1,0 +1,67 @@
+{
+  "name": "explore-forge-action-admin-assignment",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "scripts": {
+    "build": "tsdown",
+    "changelog": "echo 'Not implemented'",
+    "check": "npm run lint && npm run format:check && npm run typecheck",
+    "clean": "rm -rf ./node_modules && rm package-lock.json && rm -rf ./dist",
+    "dev": "tsdown --watch",
+    "forge:deploy": "source .env && forge deploy --environment \"$FORGE_ENVIRONMENT\"",
+    "forge:install": "source .env && forge install --site \"$FORGE_SITE\" --product \"$FORGE_PRODUCT\" --environment \"$FORGE_ENVIRONMENT\" --non-interactive",
+    "forge:uninstall": "source .env && forge uninstall --site \"$FORGE_SITE\" --product \"$FORGE_PRODUCT\"",
+    "forge:upgrade": "source .env && forge install --upgrade --site \"$FORGE_SITE\" --product \"$FORGE_PRODUCT\" --environment \"$FORGE_ENVIRONMENT\" --non-interactive",
+    "forge:variables:set": "source .env && forge variables set --environment \"$FORGE_ENVIRONMENT\"",
+    "forge:variables:set:dotenv": "./scripts/forge-vars-from-env.sh",
+    "forge:variables:set-encrypted": "source .env && forge variables set --encrypt --environment \"$FORGE_ENVIRONMENT\"",
+    "format": "echo 'Not implemented'",
+    "format:check": "echo 'Not implemented'",
+    "generate": "npm run generate:openapi && npm run generate:rovo",
+    "generate:openapi": "echo 'Not implemented'",
+    "generate:rovo": "echo 'Not implemented'",
+    "lint": "eslint src/**/*",
+    "lint:check": "echo 'Not implemented'",
+    "lint:fix": "echo 'Not implemented'",
+    "prepare": "echo 'Not implemented'",
+    "preview": "echo 'Not implemented'",
+    "start": "echo 'Not implemented'",
+    "test": "echo 'Not implemented'",
+    "test:coverage": "echo 'Not implemented'",
+    "test:watch": "echo 'Not implemented'",
+    "todo": "grep -rn 'TODO' --exclude='package.json' . --color=auto || echo 'No TODOs found!'",
+    "typecheck": "echo 'Not implemented'"
+  },
+  "overrides": {
+    "@atlaskit/forge-react-types": "2.0.0"
+  },
+  "dependencies": {
+    "@forge-ahead/atlassian-api-types": "github:ibuchanan/forge-ahead-atlassian-api-types#0.1.0",
+    "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors#0.1.0",
+    "@forge/api": "^8.0",
+    "@forge/bridge": "^6.1",
+    "@forge/react": "^12.0",
+    "@forge/resolver": "^2.0",
+    "react": "^18.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.2",
+    "@size-limit/preset-app": "^12.1",
+    "@types/node": "24",
+    "lefthook": "^2.1",
+    "redocly": "*",
+    "size-limit": "^12.1",
+    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep",
+    "typescript": "^5.9",
+    "vitest": "*"
+  }
+}
