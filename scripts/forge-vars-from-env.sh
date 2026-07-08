@@ -8,8 +8,8 @@ grep '^[^#]\w*=.*' ./.env | while IFS='=' read -r key value; do
     # Skip vars that configure Forge commands.
     :
     ;;
-  *SECRET*)
-    # Encrypt vars that contain SECRET.
+  *SECRET* | *TOKEN* | *CREDENTIAL*)
+    # Encrypt vars that look like secrets, tokens, or credentials.
     echo npm -s run forge:variables:set-encrypted -- "$key" "****"
     npm -s run forge:variables:set-encrypted -- "$key" "$value"
     ;;
