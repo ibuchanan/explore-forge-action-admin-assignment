@@ -9,6 +9,8 @@ export interface DirectoryGroup {
   modifiable: boolean;
 }
 
+// Hand-coded: see the note in ./users.ts. This is the same "Organizations" API
+// gap in @forge-ahead/atlassian-api-types, just for the groups/search endpoint.
 interface GroupSearchPage {
   data?: Array<{
     id: string;

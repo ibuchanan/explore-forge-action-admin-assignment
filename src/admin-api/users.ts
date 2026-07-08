@@ -14,6 +14,13 @@ export interface LookupBounds {
   timeoutMs: number;
 }
 
+// Hand-coded: @forge-ahead/atlassian-api-types does not yet generate types for
+// the Atlassian Access "Organizations" API (developer.atlassian.com/cloud/admin/
+// organization/swagger.v3.json), which is where /v2/orgs/{orgId}/directories/
+// {directoryId}/users/search lives. Its published api-access spec covers a
+// different Atlassian Access API (API tokens/OAuth clients/service accounts)
+// that happens to share the /orgs/{orgId}/... path prefix. Switch to generated
+// types once that spec is added there.
 interface UserSearchPage {
   data?: Array<{
     accountId: string;
