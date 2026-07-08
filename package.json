@@ -36,11 +36,11 @@
     "prepare": "echo 'Not implemented'",
     "preview": "echo 'Not implemented'",
     "start": "echo 'Not implemented'",
-    "test": "echo 'Not implemented'",
-    "test:coverage": "echo 'Not implemented'",
-    "test:watch": "echo 'Not implemented'",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "todo": "grep -rn 'TODO' --exclude='package.json' . --color=auto || echo 'No TODOs found!'",
-    "typecheck": "echo 'Not implemented'"
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "overrides": {
     "@atlaskit/forge-react-types": "2.0.0"
@@ -50,9 +50,11 @@
     "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors#0.1.0",
     "@forge/api": "^8.0",
     "@forge/bridge": "^6.1",
+    "@forge/kvs": "^2.0.1",
     "@forge/react": "^12.0",
     "@forge/resolver": "^2.0",
-    "react": "^18.2"
+    "react": "^18.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.2",

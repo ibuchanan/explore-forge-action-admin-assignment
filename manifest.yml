@@ -1,35 +1,46 @@
 modules:
   automation:actionProvider:
-    - key: explore-forge-action-admin-automation-action-provider-ui-kit
+    - key: admin-assignment-action-provider
       actions:
-        - automation-action-ui-kit
+        - admin-assignment-action
   action:
-    - key: automation-action-ui-kit
-      name: Automation action
-      function: add-comment-to-issue
-      description: adds comment on an issue.
+    - key: admin-assignment-action
+      name: Restore admin access
+      function: restoreAccess
+      description: Restores a Target User's directory access and adds them to the
+        Selected Groups.
       config:
         resource: main-resource
         render: native
       inputs:
-        issueKey:
-          title: Issue Id
+        initiatorAccountId:
+          title: Initiator account ID
           type: string
-          description: The issue id for the Jira issue id where a comments needs to be added
+          description: The account ID of the Authorized Initiator, e.g.
+            {{initiator.accountId}}
           required: true
-        comment:
-          title: Comment
+        targetUserEmail:
+          title: Target user email
           type: string
-          description: The comment that needs to be added to the issue
+          description: The email address of the Target User whose access should be restored
           required: true
-      actionVerb: CREATE
-      resolver:
-        function: automation-resolver
+        selectedGroupKeys:
+          title: Selected group keys
+          type: string
+          description: Comma-separated Group Keys chosen from the configured Allowed Groups
+          required: true
+      actionVerb: UPDATE
+  trigger:
+    - key: admin-assignment-lifecycle-trigger
+      function: runLifecycleValidation
+      events:
+        - avi:forge:installed:app
+        - avi:forge:upgraded:app
   function:
-    - key: add-comment-to-issue
-      handler: index.addComment
-    - key: automation-resolver
-      handler: index.handler
+    - key: restoreAccess
+      handler: index.restoreAccess
+    - key: runLifecycleValidation
+      handler: index.runLifecycleValidation
 app:
   runtime:
     name: nodejs24.x
@@ -41,5 +52,8 @@ resources:
     path: src/frontend/index.tsx
 permissions:
   scopes:
-    - write:jira-work
-    - read:jira-work
+    - storage:app
+  external:
+    fetch:
+      backend:
+        - address: https://api.atlassian.com
