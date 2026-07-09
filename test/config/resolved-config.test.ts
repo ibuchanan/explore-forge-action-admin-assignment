@@ -1,9 +1,9 @@
 import api from "@forge/api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiResponse } from "../admin-api/test-helpers";
-import { computeSourceConfigFingerprint } from "./fingerprint";
-import { resolveConfig } from "./resolved-config";
-import type { SourceConfig } from "./source-config";
+import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
+import { resolveConfig } from "../../src/config/resolved-config";
+import type { SourceConfig } from "../../src/config/source-config";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },

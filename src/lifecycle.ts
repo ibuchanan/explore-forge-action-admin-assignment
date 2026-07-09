@@ -1,8 +1,8 @@
 import { toErrorMessage } from "@forge-ahead/errors";
-import { storeResolvedConfig } from "./config-health/store";
-import { parseSourceConfig } from "./config/source-config";
-import { resolveConfig } from "./config/resolved-config";
 import type { ResolvedConfig } from "./config/resolved-config";
+import { resolveConfig } from "./config/resolved-config";
+import { parseSourceConfig } from "./config/source-config";
+import { storeResolvedConfig } from "./config-health/store";
 
 function inactiveConfigHealth(messages: string[]): ResolvedConfig {
   return {

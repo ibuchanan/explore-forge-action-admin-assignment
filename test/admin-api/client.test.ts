@@ -1,6 +1,6 @@
 import api from "@forge/api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { sendAdminApiRequest } from "./client";
+import { sendAdminApiRequest } from "../../src/admin-api/client";
 import { mockApiResponse as jsonResponse } from "./test-helpers";
 
 vi.mock("@forge/api", () => ({

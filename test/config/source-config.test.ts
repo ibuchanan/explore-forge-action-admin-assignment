@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LOOKUP_BUDGET, parseSourceConfig } from "./source-config";
+import {
+  DEFAULT_LOOKUP_BUDGET,
+  parseSourceConfig,
+} from "../../src/config/source-config";
 
 describe("parseSourceConfig", () => {
   it("parses a valid minimal Source Config and applies default Lookup Budget values", () => {

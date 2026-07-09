@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { computeSourceConfigFingerprint } from "./fingerprint";
-import type { SourceConfig } from "./source-config";
+import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
+import type { SourceConfig } from "../../src/config/source-config";
 
 const baseConfig: SourceConfig = {
   orgId: "org-1",

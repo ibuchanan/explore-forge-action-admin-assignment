@@ -1,7 +1,7 @@
 import api from "@forge/api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiResponse as jsonResponse } from "./test-helpers";
-import { findGroupByName } from "./groups";
+import { findGroupByName } from "../../src/admin-api/groups";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },

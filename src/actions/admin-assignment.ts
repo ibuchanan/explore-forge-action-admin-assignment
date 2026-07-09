@@ -1,13 +1,13 @@
-import { StandardError, type ProblemDetails } from "@forge-ahead/errors";
+import { type ProblemDetails, StandardError } from "@forge-ahead/errors";
 import { addUserToGroup } from "../admin-api/groups";
 import { findUserByEmail, restoreTargetUserAccess } from "../admin-api/users";
+import { computeSourceConfigFingerprint } from "../config/fingerprint";
+import { type ResolvedConfig, resolveConfig } from "../config/resolved-config";
+import { parseSourceConfig } from "../config/source-config";
 import {
   getStoredResolvedConfig,
   storeResolvedConfig,
 } from "../config-health/store";
-import { computeSourceConfigFingerprint } from "../config/fingerprint";
-import { resolveConfig, type ResolvedConfig } from "../config/resolved-config";
-import { parseSourceConfig } from "../config/source-config";
 import {
   parseSelectedGroupKeys,
   planAccessRestoration,

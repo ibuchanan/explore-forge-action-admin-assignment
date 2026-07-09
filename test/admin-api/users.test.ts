@@ -1,7 +1,10 @@
 import api from "@forge/api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiResponse as jsonResponse } from "./test-helpers";
-import { findUserByEmail, restoreTargetUserAccess } from "./users";
+import {
+  findUserByEmail,
+  restoreTargetUserAccess,
+} from "../../src/admin-api/users";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },

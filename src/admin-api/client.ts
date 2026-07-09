@@ -1,6 +1,6 @@
 import api, { type APIResponse } from "@forge/api";
-import { type Result, ok } from "@forge-ahead/errors";
 import type { ProblemDetails } from "@forge-ahead/errors";
+import { err, ok, type Result, StandardError } from "@forge-ahead/errors";
 
 const ADMIN_API_BASE_URL = "https://api.atlassian.com";
 const DEFAULT_MAX_RETRIES = 2;
@@ -12,6 +12,23 @@ export interface AdminApiRequest {
   path: string;
   body?: unknown;
   maxRetries?: number;
+}
+
+export interface LookupBounds {
+  maxPages: number;
+  timeoutMs: number;
+}
+
+export interface PaginatedLookupMessages {
+  timeout: string;
+  requestFailed: string;
+  notFound: string;
+  multipleFound: string;
+}
+
+interface PaginatedSearchPage<TCandidate> {
+  data?: TCandidate[];
+  links?: { next?: string };
 }
 
 function sleep(ms: number): Promise<void> {
@@ -78,4 +95,64 @@ export async function sendAdminApiRequest(
     );
     attempt += 1;
   }
+}
+
+// Resolves a paginated Admin API search to exactly one match, failing closed
+// on 0 or >1 matches. Both group-by-name and user-by-email lookups need this
+// exact same page-walking, timeout, and uniqueness handling; only the request
+// shape, candidate matching, and error messages differ per caller.
+export async function resolveUniqueMatch<TCandidate, TMatch>(
+  apiToken: string,
+  bounds: LookupBounds,
+  buildRequest: (cursor: string | undefined) => AdminApiRequest,
+  mapCandidate: (candidate: TCandidate) => TMatch | undefined,
+  messages: PaginatedLookupMessages,
+): Promise<Result<TMatch, ProblemDetails>> {
+  const deadline = Date.now() + bounds.timeoutMs;
+  const matches: TMatch[] = [];
+  let cursor: string | undefined;
+
+  for (let page = 0; page < bounds.maxPages; page += 1) {
+    if (Date.now() > deadline) {
+      return StandardError.getOrDefault(504).error(messages.timeout);
+    }
+
+    const response = await sendAdminApiRequest(apiToken, buildRequest(cursor));
+
+    if (response.isErr()) {
+      return err(response.error);
+    }
+
+    const apiResponse = response.value;
+    if (!apiResponse.ok) {
+      return StandardError.getOrDefault(apiResponse.status).error(
+        messages.requestFailed,
+      );
+    }
+
+    const body = (await apiResponse.json()) as PaginatedSearchPage<TCandidate>;
+    for (const candidate of body.data ?? []) {
+      const match = mapCandidate(candidate);
+      if (match !== undefined) {
+        matches.push(match);
+      }
+    }
+
+    cursor = body.links?.next;
+    if (!cursor) {
+      break;
+    }
+  }
+
+  const [match, ...rest] = matches;
+
+  if (!match) {
+    return StandardError.getOrDefault(404).error(messages.notFound);
+  }
+
+  if (rest.length > 0) {
+    return StandardError.getOrDefault(409).error(messages.multipleFound);
+  }
+
+  return ok(match);
 }

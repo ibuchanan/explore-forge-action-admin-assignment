@@ -1,17 +1,16 @@
-import { type Result, StandardError, err, ok } from "@forge-ahead/errors";
 import type { ProblemDetails } from "@forge-ahead/errors";
-import { sendAdminApiRequest } from "./client";
+import { err, ok, type Result, StandardError } from "@forge-ahead/errors";
+import {
+  type LookupBounds,
+  resolveUniqueMatch,
+  sendAdminApiRequest,
+} from "./client";
 
 export interface DirectoryUser {
   accountId: string;
   email: string;
   active: boolean;
   groupIds: string[];
-}
-
-export interface LookupBounds {
-  maxPages: number;
-  timeoutMs: number;
 }
 
 // Hand-coded: @forge-ahead/atlassian-api-types does not yet generate types for
@@ -21,14 +20,11 @@ export interface LookupBounds {
 // different Atlassian Access API (API tokens/OAuth clients/service accounts)
 // that happens to share the /orgs/{orgId}/... path prefix. Switch to generated
 // types once that spec is added there.
-interface UserSearchPage {
-  data?: Array<{
-    accountId: string;
-    email: string;
-    accountStatus?: string;
-    groups?: Array<{ id: string }>;
-  }>;
-  links?: { next?: string };
+interface UserSearchCandidate {
+  accountId: string;
+  email: string;
+  accountStatus?: string;
+  groups?: Array<{ id: string }>;
 }
 
 function normalizeEmail(email: string): string {
@@ -43,71 +39,35 @@ export async function findUserByEmail(
   bounds: LookupBounds,
 ): Promise<Result<DirectoryUser, ProblemDetails>> {
   const normalizedTarget = normalizeEmail(targetUserEmail);
-  const deadline = Date.now() + bounds.timeoutMs;
 
-  const matches: DirectoryUser[] = [];
-  let cursor: string | undefined;
-
-  for (let page = 0; page < bounds.maxPages; page += 1) {
-    if (Date.now() > deadline) {
-      return StandardError.getOrDefault(504).error(
-        "Target User Email resolution exceeded the Lookup Budget timeout",
-      );
-    }
-
-    const response = await sendAdminApiRequest(apiToken, {
+  return resolveUniqueMatch<UserSearchCandidate, DirectoryUser>(
+    apiToken,
+    bounds,
+    (cursor) => ({
       method: "POST",
       path: `/v2/orgs/${orgId}/directories/${directoryId}/users/search`,
       body: {
         emails: [normalizedTarget],
         ...(cursor ? { cursor } : {}),
       },
-    });
-
-    if (response.isErr()) {
-      return err(response.error);
-    }
-
-    const apiResponse = response.value;
-    if (!apiResponse.ok) {
-      return StandardError.getOrDefault(apiResponse.status).error(
-        "Target User Email resolution failed",
-      );
-    }
-
-    const body = (await apiResponse.json()) as UserSearchPage;
-    for (const candidate of body.data ?? []) {
-      if (normalizeEmail(candidate.email) === normalizedTarget) {
-        matches.push({
-          accountId: candidate.accountId,
-          email: candidate.email,
-          active: candidate.accountStatus === "active",
-          groupIds: (candidate.groups ?? []).map((group) => group.id),
-        });
-      }
-    }
-
-    cursor = body.links?.next;
-    if (!cursor) {
-      break;
-    }
-  }
-
-  const [match, ...rest] = matches;
-
-  if (!match) {
-    return StandardError.getOrDefault(404).error(
-      "Target User Email did not resolve to any account",
-    );
-  }
-
-  if (rest.length > 0) {
-    return StandardError.getOrDefault(409).error(
-      "Target User Email resolved to more than one account",
-    );
-  }
-
-  return ok(match);
+    }),
+    (candidate) =>
+      normalizeEmail(candidate.email) === normalizedTarget
+        ? {
+            accountId: candidate.accountId,
+            email: candidate.email,
+            active: candidate.accountStatus === "active",
+            groupIds: (candidate.groups ?? []).map((group) => group.id),
+          }
+        : undefined,
+    {
+      timeout:
+        "Target User Email resolution exceeded the Lookup Budget timeout",
+      requestFailed: "Target User Email resolution failed",
+      notFound: "Target User Email did not resolve to any account",
+      multipleFound: "Target User Email resolved to more than one account",
+    },
+  );
 }
 
 export async function restoreTargetUserAccess(

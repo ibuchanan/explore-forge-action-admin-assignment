@@ -1,5 +1,5 @@
-import { type Result, err, ok } from "@forge-ahead/errors";
 import type { ValidationProblemDetails } from "@forge-ahead/errors";
+import { err, ok, type Result } from "@forge-ahead/errors";
 import { z } from "zod";
 
 export interface LookupBudget {

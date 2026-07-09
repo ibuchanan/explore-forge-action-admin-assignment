@@ -1,5 +1,5 @@
-import React from "react";
 import ForgeReconciler, { Text } from "@forge/react";
+import React from "react";
 
 const App = () => <Text>Admin Access Automation</Text>;
 

@@ -1,7 +1,10 @@
-import { type Result, StandardError, err, ok } from "@forge-ahead/errors";
 import type { ProblemDetails } from "@forge-ahead/errors";
-import { sendAdminApiRequest } from "./client";
-import type { LookupBounds } from "./users";
+import { err, ok, type Result, StandardError } from "@forge-ahead/errors";
+import {
+  type LookupBounds,
+  resolveUniqueMatch,
+  sendAdminApiRequest,
+} from "./client";
 
 export interface DirectoryGroup {
   id: string;
@@ -11,13 +14,10 @@ export interface DirectoryGroup {
 
 // Hand-coded: see the note in ./users.ts. This is the same "Organizations" API
 // gap in @forge-ahead/atlassian-api-types, just for the groups/search endpoint.
-interface GroupSearchPage {
-  data?: Array<{
-    id: string;
-    name: string;
-    managementAccess?: { modifiable?: boolean };
-  }>;
-  links?: { next?: string };
+interface GroupSearchCandidate {
+  id: string;
+  name: string;
+  managementAccess?: { modifiable?: boolean };
 }
 
 export async function findGroupByName(
@@ -27,69 +27,33 @@ export async function findGroupByName(
   allowedGroupName: string,
   bounds: LookupBounds,
 ): Promise<Result<DirectoryGroup, ProblemDetails>> {
-  const deadline = Date.now() + bounds.timeoutMs;
-  const matches: DirectoryGroup[] = [];
-  let cursor: string | undefined;
-
-  for (let page = 0; page < bounds.maxPages; page += 1) {
-    if (Date.now() > deadline) {
-      return StandardError.getOrDefault(504).error(
-        "Allowed Group Name resolution exceeded the Lookup Budget timeout",
-      );
-    }
-
-    const response = await sendAdminApiRequest(apiToken, {
+  return resolveUniqueMatch<GroupSearchCandidate, DirectoryGroup>(
+    apiToken,
+    bounds,
+    (cursor) => ({
       method: "POST",
       path: `/v2/orgs/${orgId}/directories/${directoryId}/groups/search`,
       body: {
-        searchTerm: allowedGroupName,
+        groupNames: [allowedGroupName],
         ...(cursor ? { cursor } : {}),
       },
-    });
-
-    if (response.isErr()) {
-      return err(response.error);
-    }
-
-    const apiResponse = response.value;
-    if (!apiResponse.ok) {
-      return StandardError.getOrDefault(apiResponse.status).error(
-        "Allowed Group Name resolution failed",
-      );
-    }
-
-    const body = (await apiResponse.json()) as GroupSearchPage;
-    for (const candidate of body.data ?? []) {
-      if (candidate.name === allowedGroupName) {
-        matches.push({
-          id: candidate.id,
-          name: candidate.name,
-          modifiable: candidate.managementAccess?.modifiable ?? true,
-        });
-      }
-    }
-
-    cursor = body.links?.next;
-    if (!cursor) {
-      break;
-    }
-  }
-
-  const [match, ...rest] = matches;
-
-  if (!match) {
-    return StandardError.getOrDefault(404).error(
-      "Allowed Group Name did not resolve to any group",
-    );
-  }
-
-  if (rest.length > 0) {
-    return StandardError.getOrDefault(409).error(
-      "Allowed Group Name resolved to more than one group",
-    );
-  }
-
-  return ok(match);
+    }),
+    (candidate) =>
+      candidate.name === allowedGroupName
+        ? {
+            id: candidate.id,
+            name: candidate.name,
+            modifiable: candidate.managementAccess?.modifiable ?? true,
+          }
+        : undefined,
+    {
+      timeout:
+        "Allowed Group Name resolution exceeded the Lookup Budget timeout",
+      requestFailed: "Allowed Group Name resolution failed",
+      notFound: "Allowed Group Name did not resolve to any group",
+      multipleFound: "Allowed Group Name resolved to more than one group",
+    },
+  );
 }
 
 export async function addUserToGroup(

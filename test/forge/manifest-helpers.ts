@@ -83,16 +83,6 @@ export function loadManifest(): ParsedManifest {
   return parseYaml(manifestContent) as ParsedManifest;
 }
 
-export function getModuleResolvers(
-  manifest: ParsedManifest,
-): AssetsImportTypeModule[] {
-  return manifest.modules["jiraServiceManagement:assetsImportType"] || [];
-}
-
-export function getConsumerQueueNames(manifest: ParsedManifest): string[] {
-  return (manifest.modules.consumer || []).map((consumer) => consumer.queue);
-}
-
 export function getManifestScopes(manifest: ParsedManifest): string[] {
   const permissions = (
     manifest as ParsedManifest & {
@@ -202,14 +192,4 @@ export function getManifestHandlerReferences(
   }
 
   return refs;
-}
-
-export function getProjectPaths() {
-  const root = process.cwd();
-  return {
-    manifest: join(root, "manifest.yml"),
-    srcIndex: join(root, "src/index.ts"),
-    resolversIndex: join(root, "src/resolvers/index.ts"),
-    frontendIndex: join(root, "src/frontend/index.tsx"),
-  };
 }

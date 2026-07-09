@@ -110,6 +110,16 @@ The app is configured entirely through Forge environment variables
 [find-org-id]: https://confluence.atlassian.com/cloudkb/retrieve-my-atlassian-cloud-organization-s-id-1207189876.html
 [list-directories]: https://developer.atlassian.com/cloud/admin/organization/rest/api-group-directory/
 
+## Using in Automation
+
+The action is supported only behind a Jira Automation manual trigger from a work item.
+
+Required Forge action inputs:
+
+- `initiatorAccountId`: the account ID from `{{initiator.accountId}}`. This value is implicit.
+- `targetUserEmail`: the Target User Email entered by the Authorized Initiator at manual trigger time.
+- `selectedGroupKeys`: comma-separated Group Keys chosen at manual trigger time.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to propose changes,

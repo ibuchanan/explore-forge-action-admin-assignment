@@ -10,10 +10,10 @@ import {
   vi,
 } from "vitest";
 import { mockApiResponse } from "../admin-api/test-helpers";
-import { computeSourceConfigFingerprint } from "../config/fingerprint";
-import type { ResolvedConfig } from "../config/resolved-config";
-import { parseSourceConfig } from "../config/source-config";
-import { restoreAccess } from "./admin-assignment";
+import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
+import type { ResolvedConfig } from "../../src/config/resolved-config";
+import { parseSourceConfig } from "../../src/config/source-config";
+import { restoreAccess } from "../../src/actions/admin-assignment";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },

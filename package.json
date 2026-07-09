@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "changelog": "echo 'Not implemented'",
-    "check": "npm run test && npm run lint && npm run format:check && npm run typecheck",
+    "check": "npm run format:check && npm run typecheck  && npm run lint && npm run test",
     "clean": "rm -rf ./node_modules && rm package-lock.json && rm -rf ./dist",
     "dev": "tsc -p tsconfig.build.json --watch",
     "forge:deploy": "source .env && forge deploy --environment \"$FORGE_ENVIRONMENT\"",
@@ -27,18 +27,12 @@
     "forge:variables:set-encrypted": "source .env && forge variables set --encrypt --environment \"$FORGE_ENVIRONMENT\"",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "generate": "npm run generate:openapi && npm run generate:rovo",
-    "generate:openapi": "echo 'Not implemented'",
-    "generate:rovo": "echo 'Not implemented'",
     "lint": "npm run lint:prelint && npm run lint:check && npm run lint:forge",
     "lint:check": "biome lint .",
     "lint:fix": "biome lint --write .",
     "lint:forge": "forge lint",
-    "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.recommended.yml",
-    "prepare": "echo 'Not implemented'",
-    "preview": "echo 'Not implemented'",
+    "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.strict.yml",
     "size": "npm run build && size-limit",
-    "start": "echo 'Not implemented'",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
@@ -52,25 +46,23 @@
     "@forge-ahead/atlassian-api-types": "github:ibuchanan/forge-ahead-atlassian-api-types#0.1.0",
     "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors#0.1.0",
     "@forge/api": "^8.0",
-    "@forge/bridge": "^6.1",
     "@forge/kvs": "^2.0.1",
     "@forge/react": "^12.0",
-    "@forge/resolver": "^2.0",
     "react": "^18.2",
-    "zod": "^4.4.3"
+    "zod": "^4.4"
   },
   "devDependencies": {
-    "@ast-grep/cli": "^0.44.1",
+    "@ast-grep/cli": "^0.44",
     "@biomejs/biome": "2.5.2",
     "@size-limit/preset-app": "^12.1",
     "@types/node": "24",
-    "archunit": "*",
+    "archunit": "^2.3",
     "lefthook": "^2.1",
-    "redocly": "*",
     "size-limit": "^12.1",
     "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep",
     "typescript": "^5.9",
-    "vitest": "*"
+    "vitest": "^4.1",
+    "yaml": "^2.9"
   },
   "engines": {
     "node": "24.x"
@@ -89,8 +81,7 @@
       "name": "Forge backend action bundle",
       "path": [
         "dist/**/*.js",
-        "!dist/frontend/**",
-        "!dist/resolvers/**"
+        "!dist/frontend/**"
       ],
       "limit": "15 kB"
     }

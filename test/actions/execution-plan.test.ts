@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { DirectoryUser } from "../admin-api/users";
-import type { ResolvedConfig } from "../config/resolved-config";
+import type { DirectoryUser } from "../../src/admin-api/users";
+import type { ResolvedConfig } from "../../src/config/resolved-config";
 import {
   parseSelectedGroupKeys,
   planAccessRestoration,
   resolveSelectedGroups,
-} from "./execution-plan";
+} from "../../src/actions/execution-plan";
 
 const jiraAdmins = {
   key: "jira-admins",

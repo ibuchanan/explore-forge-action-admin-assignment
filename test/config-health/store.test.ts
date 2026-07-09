@@ -1,7 +1,10 @@
 import { kvs } from "@forge/kvs";
 import { type Mock, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ResolvedConfig } from "../config/resolved-config";
-import { getStoredResolvedConfig, storeResolvedConfig } from "./store";
+import type { ResolvedConfig } from "../../src/config/resolved-config";
+import {
+  getStoredResolvedConfig,
+  storeResolvedConfig,
+} from "../../src/config-health/store";
 
 vi.mock("@forge/kvs", () => ({
   kvs: { get: vi.fn(), set: vi.fn() },

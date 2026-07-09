@@ -2,7 +2,7 @@ import api from "@forge/api";
 import { kvs } from "@forge/kvs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiResponse } from "./admin-api/test-helpers";
-import { runLifecycleValidation } from "./lifecycle";
+import { runLifecycleValidation } from "../src/lifecycle";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },
