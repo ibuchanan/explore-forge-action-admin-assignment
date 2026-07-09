@@ -3,6 +3,7 @@ modules:
     - key: admin-assignment-action-provider
       actions:
         - admin-assignment-action
+        - admin-assignment-batch-action
   action:
     - key: admin-assignment-action
       name: Restore admin access
@@ -30,6 +31,38 @@ modules:
           description: Comma-separated Group Keys chosen from the configured Allowed Groups
           required: true
       actionVerb: UPDATE
+    - key: admin-assignment-batch-action
+      name: Restore admin access (bulk)
+      function: enqueueAccessRestorationBatch
+      description: Enqueues a Batch Access Restoration for one or more Target User
+        Emails, each restoring directory access and adding the Selected Groups
+        independently.
+      config:
+        resource: main-resource
+        render: native
+      inputs:
+        initiatorAccountId:
+          title: Initiator account ID
+          type: string
+          description: The account ID of the Authorized Initiator, e.g.
+            {{initiator.accountId}}
+          required: true
+        targetUserEmails:
+          title: Target user emails
+          type: string
+          description: Comma-separated email addresses of the Target Users whose
+            access should be restored
+          required: true
+        selectedGroupKeys:
+          title: Selected group keys
+          type: string
+          description: Comma-separated Group Keys chosen from the configured Allowed Groups
+          required: true
+      actionVerb: UPDATE
+  consumer:
+    - key: admin-assignment-batch-consumer
+      queue: admin-assignment-batch-queue
+      function: processAccessRestorationBatchEvent
   trigger:
     - key: admin-assignment-lifecycle-trigger
       function: runLifecycleValidation
@@ -39,6 +72,10 @@ modules:
   function:
     - key: restoreAccess
       handler: index.restoreAccess
+    - key: enqueueAccessRestorationBatch
+      handler: index.enqueueAccessRestorationBatch
+    - key: processAccessRestorationBatchEvent
+      handler: index.processAccessRestorationBatchEvent
     - key: runLifecycleValidation
       handler: index.runLifecycleValidation
 app:

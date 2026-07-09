@@ -3,6 +3,7 @@ import type { DirectoryUser } from "../../src/admin-api/users";
 import type { ResolvedConfig } from "../../src/config/resolved-config";
 import {
   parseSelectedGroupKeys,
+  parseTargetUserEmails,
   planAccessRestoration,
   resolveSelectedGroups,
 } from "../../src/actions/execution-plan";
@@ -49,6 +50,32 @@ describe("parseSelectedGroupKeys", () => {
       "jira-admins",
       "support-admins",
     ]);
+  });
+});
+
+describe("parseTargetUserEmails", () => {
+  it("splits a comma-separated Runtime Input into trimmed Target User Emails", () => {
+    expect(
+      parseTargetUserEmails(" alice@example.com, bob@example.com "),
+    ).toEqual(["alice@example.com", "bob@example.com"]);
+  });
+
+  it("returns an empty array for missing or blank input", () => {
+    expect(parseTargetUserEmails(undefined)).toEqual([]);
+    expect(parseTargetUserEmails("")).toEqual([]);
+    expect(parseTargetUserEmails("  ")).toEqual([]);
+  });
+
+  it("drops empty entries from stray commas", () => {
+    expect(
+      parseTargetUserEmails("alice@example.com,,bob@example.com,"),
+    ).toEqual(["alice@example.com", "bob@example.com"]);
+  });
+
+  it("does not dedupe repeated Target User Emails", () => {
+    expect(
+      parseTargetUserEmails("alice@example.com,alice@example.com"),
+    ).toEqual(["alice@example.com", "alice@example.com"]);
   });
 });
 

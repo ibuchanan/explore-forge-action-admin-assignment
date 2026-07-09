@@ -266,6 +266,83 @@ describe("restoreAccess", () => {
     expect(api.fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("includes the Batch ID in the Audit Record when the payload carries one", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    setValidEnv();
+    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    vi.mocked(api.fetch).mockResolvedValueOnce(
+      mockApiResponse(200, {
+        data: [
+          {
+            accountId: "target-1",
+            email: "person@example.com",
+            accountStatus: "active",
+            groups: [{ id: "group-1" }],
+          },
+        ],
+        links: {},
+      }),
+    );
+
+    await restoreAccess({
+      initiatorAccountId: "initiator-1",
+      targetUserEmail: "person@example.com",
+      selectedGroupKeys: "jira-admins",
+      batchId: "batch-1",
+    });
+
+    const loggedRecord = logSpy.mock.calls
+      .map((call) => call[0])
+      .find(
+        (entry) =>
+          typeof entry === "object" &&
+          entry !== null &&
+          "event" in entry &&
+          entry.event === "admin-assignment-audit",
+      ) as Record<string, unknown> | undefined;
+
+    expect(loggedRecord?.batchId).toBe("batch-1");
+    logSpy.mockRestore();
+  });
+
+  it("omits the batchId field entirely from the Audit Record for a single-user run without one", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    setValidEnv();
+    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    vi.mocked(api.fetch).mockResolvedValueOnce(
+      mockApiResponse(200, {
+        data: [
+          {
+            accountId: "target-1",
+            email: "person@example.com",
+            accountStatus: "active",
+            groups: [{ id: "group-1" }],
+          },
+        ],
+        links: {},
+      }),
+    );
+
+    await restoreAccess({
+      initiatorAccountId: "initiator-1",
+      targetUserEmail: "person@example.com",
+      selectedGroupKeys: "jira-admins",
+    });
+
+    const loggedRecord = logSpy.mock.calls
+      .map((call) => call[0])
+      .find(
+        (entry) =>
+          typeof entry === "object" &&
+          entry !== null &&
+          "event" in entry &&
+          entry.event === "admin-assignment-audit",
+      ) as Record<string, unknown> | undefined;
+
+    expect(loggedRecord && "batchId" in loggedRecord).toBe(false);
+    logSpy.mockRestore();
+  });
+
   it("never logs the Service Credential in the Audit Record on success or failure", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     setValidEnv();

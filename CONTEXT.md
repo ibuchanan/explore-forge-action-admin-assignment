@@ -96,6 +96,18 @@ _Avoid_: group ID, group name
 The complete operation of restoring a Target User's directory access and adding them to the Selected Groups.
 _Avoid_: admin assignment, activation only
 
+**Batch Access Restoration**:
+The operation of performing an Access Restoration independently for each of one or more Target User Emails submitted together as Runtime Input to a single action execution.
+_Avoid_: bulk assignment, multi-user restoration
+
+**Target User Outcome**:
+The success or failure result of one Target User's Access Restoration within a Batch Access Restoration, including the failing step name when unsuccessful.
+_Avoid_: batch result, user result
+
+**Batch ID**:
+A generated identifier included in every Target User Outcome's Audit Record produced by the same Batch Access Restoration, used to correlate its logs. Absent for a single, non-batch Access Restoration.
+_Avoid_: run ID, correlation ID, batch summary
+
 **Preflight Check**:
 A bounded read performed before access changes to detect invalid or already-satisfied requests.
 _Avoid_: dry run, approval step
@@ -134,6 +146,11 @@ _Avoid_: audit record, raw API response
 - **Access Restoration** does not roll back earlier successful changes when a later change fails.
 - **Access Restoration** can be rerun when Cloud Admin responses show the desired state already exists.
 - Already-satisfied Access Restoration steps count as successful outcomes.
+- A **Batch Access Restoration** processes one or more Target User Emails as Runtime Input, each resolving to its own **Access Restoration**.
+- A failing **Target User Outcome** does not stop the other Target User Emails in the same **Batch Access Restoration**.
+- **Target User Emails** are not deduplicated within a **Batch Access Restoration**, since **Access Restoration** is idempotent.
+- Every **Target User Outcome**'s **Audit Record** includes the **Batch ID** of the **Batch Access Restoration** it belongs to.
+- A **Batch Access Restoration** does not return **Target User Outcomes** to the triggering Automation rule; they are only available as structured logs.
 - **Preflight Checks** run before Access Restoration writes when they fit within the Lookup Budget.
 - Every attempted Access Restoration produces an **Audit Record**.
 - **Audit Records** are emitted as structured logs rather than stored as app state.

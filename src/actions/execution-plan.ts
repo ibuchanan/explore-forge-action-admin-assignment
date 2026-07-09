@@ -23,6 +23,17 @@ export function parseSelectedGroupKeys(raw: string | undefined): string[] {
     .filter((key) => key.length > 0);
 }
 
+export function parseTargetUserEmails(raw: string | undefined): string[] {
+  if (!raw) {
+    return [];
+  }
+
+  return raw
+    .split(",")
+    .map((email) => email.trim())
+    .filter((email) => email.length > 0);
+}
+
 export function resolveSelectedGroups(
   selectedGroupKeys: string[],
   resolvedConfig: ResolvedConfig,

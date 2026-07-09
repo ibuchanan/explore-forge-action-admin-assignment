@@ -18,6 +18,7 @@ export interface AdminAssignmentActionPayload {
   initiatorAccountId?: string;
   targetUserEmail?: string;
   selectedGroupKeys?: string;
+  batchId?: string;
 }
 
 export interface SuccessSummary {
@@ -48,6 +49,7 @@ export async function restoreAccess(
     steps.push({ step, outcome: "failure", detail: problemDetails.detail });
     console.log({
       event: "admin-assignment-audit",
+      ...(payload.batchId ? { batchId: payload.batchId } : {}),
       initiatorAccountId: payload.initiatorAccountId,
       targetUserEmail: payload.targetUserEmail,
       resolvedTargetAccountId,
@@ -195,6 +197,7 @@ export async function restoreAccess(
 
   console.log({
     event: "admin-assignment-audit",
+    ...(payload.batchId ? { batchId: payload.batchId } : {}),
     initiatorAccountId,
     targetUserEmail,
     resolvedTargetAccountId,

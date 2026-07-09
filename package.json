@@ -47,6 +47,7 @@
     "@forge-ahead/atlassian-api-types": "github:ibuchanan/forge-ahead-atlassian-api-types#0.1.0",
     "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors#0.1.0",
     "@forge/api": "^8.0",
+    "@forge/events": "^3.0.1",
     "@forge/kvs": "^2.0.1",
     "@forge/react": "^12.0",
     "react": "^18.2",
