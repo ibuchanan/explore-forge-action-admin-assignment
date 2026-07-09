@@ -16,8 +16,8 @@
     "rootDir": "src",
     "sourceMap": true,
     "jsx": "react-jsx",
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
+    "moduleResolution": "node",
+    "module": "ESNext",
 
     /* Strictness */
     "strict": true,
