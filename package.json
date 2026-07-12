@@ -32,7 +32,7 @@
     "lint:check": "biome lint .",
     "lint:fix": "biome lint --write .",
     "lint:forge": "forge lint",
-    "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.strict.yml",
+    "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.ecosol.yml",
     "size": "npm run build && size-limit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -56,12 +56,12 @@
   "devDependencies": {
     "@ast-grep/cli": "^0.44",
     "@biomejs/biome": "2.5.2",
-    "@size-limit/preset-app": "^12.1",
+    "@size-limit/file": "^12.1",
     "@types/node": "24",
     "archunit": "^2.3",
     "lefthook": "^2.1",
     "size-limit": "^12.1",
-    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep",
+    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep#v0.1.0",
     "typescript": "^5.9",
     "vitest": "^4.1",
     "yaml": "^2.9"
