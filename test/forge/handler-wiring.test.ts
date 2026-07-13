@@ -54,4 +54,24 @@ describe("Forge handler wiring", () => {
         : undefined,
     ).toEqual([]);
   });
+
+  it("should keep function keys within Forge's manifest limit", () => {
+    const manifest = loadManifest();
+
+    for (const func of manifest.modules.function || []) {
+      expect(func.key.length).toBeLessThanOrEqual(23);
+    }
+  });
+
+  it("should configure the batch consumer for long-running compute", () => {
+    const manifest = loadManifest();
+    const batchConsumer = manifest.modules.consumer?.find(
+      (consumer) => consumer.key === "admin-assignment-batch-consumer",
+    );
+    const batchFunction = manifest.modules.function?.find(
+      (func) => func.key === batchConsumer?.function,
+    );
+
+    expect(batchFunction?.timeoutSeconds).toBe(900);
+  });
 });

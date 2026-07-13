@@ -28,13 +28,13 @@ The action uses the Atlassian Organizations REST API with a Service Credential.
 Restore Target User access:
 
 ```text
-POST /v2/orgs/{orgId}/directories/{directoryId}/users/{accountId}/restore
+POST https://api.atlassian.com/admin/v2/orgs/{orgId}/directories/{directoryId}/users/{accountId}/restore
 ```
 
 Add Target User to an Allowed Group:
 
 ```text
-POST /v2/orgs/{orgId}/directories/{directoryId}/groups/{groupId}/memberships
+POST https://api.atlassian.com/admin/v2/orgs/{orgId}/directories/{directoryId}/groups/{groupId}/memberships
 ```
 
 Membership request body:
@@ -332,6 +332,7 @@ Implementation will likely require:
 - backend egress to `https://api.atlassian.com`
 - removal of Jira issue comment scopes from the sample app if no longer needed
 - action input replacement with `initiatorAccountId`, `targetUserEmail`, and `selectedGroupKeys`
+- separate native configuration resources for single-user and batch actions
 - no editable action configuration UI, or a minimal status-only UI if Forge requires a resource
 
 Manifest changes require Forge deploy and reinstall/upgrade where scopes or egress change.

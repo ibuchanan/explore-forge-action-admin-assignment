@@ -32,7 +32,7 @@ describe("sendAdminApiRequest", () => {
     }
     const [url, init] = call;
     expect(url).toBe(
-      "https://api.atlassian.com/v2/orgs/org-1/directories/dir-1/users/count",
+      "https://api.atlassian.com/admin/v2/orgs/org-1/directories/dir-1/users/count",
     );
     expect(init?.method).toBe("GET");
     expect(init?.headers?.Authorization).toBe("Bearer secret-token");

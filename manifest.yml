@@ -11,7 +11,7 @@ modules:
       description: Restores a Target User's directory access and adds them to the
         Selected Groups.
       config:
-        resource: main-resource
+        resource: single-config
         render: native
       inputs:
         initiatorAccountId:
@@ -33,12 +33,12 @@ modules:
       actionVerb: UPDATE
     - key: admin-assignment-batch-action
       name: Restore admin access (bulk)
-      function: enqueueAccessRestorationBatch
+      function: enqueueBatch
       description: Enqueues a Batch Access Restoration for one or more Target User
         Emails, each restoring directory access and adding the Selected Groups
         independently.
       config:
-        resource: main-resource
+        resource: batch-config
         render: native
       inputs:
         initiatorAccountId:
@@ -62,7 +62,7 @@ modules:
   consumer:
     - key: admin-assignment-batch-consumer
       queue: admin-assignment-batch-queue
-      function: processAccessRestorationBatchEvent
+      function: processBatch
   trigger:
     - key: admin-assignment-lifecycle-trigger
       function: runLifecycleValidation
@@ -72,10 +72,11 @@ modules:
   function:
     - key: restoreAccess
       handler: index.restoreAccess
-    - key: enqueueAccessRestorationBatch
+    - key: enqueueBatch
       handler: index.enqueueAccessRestorationBatch
-    - key: processAccessRestorationBatchEvent
+    - key: processBatch
       handler: index.processAccessRestorationBatchEvent
+      timeoutSeconds: 900
     - key: runLifecycleValidation
       handler: index.runLifecycleValidation
 app:
@@ -85,8 +86,10 @@ app:
     architecture: arm64
   id: ari:cloud:ecosystem::app/7b5d7c1c-387c-40d8-a530-e16614d64b5b
 resources:
-  - key: main-resource
-    path: src/frontend/index.tsx
+  - key: single-config
+    path: src/frontend/single-action-config.tsx
+  - key: batch-config
+    path: src/frontend/batch-action-config.tsx
 permissions:
   scopes:
     - storage:app

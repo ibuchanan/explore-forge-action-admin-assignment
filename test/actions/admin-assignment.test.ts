@@ -122,10 +122,10 @@ describe("restoreAccess", () => {
 
     const calls = vi.mocked(api.fetch).mock.calls;
     expect(calls[1]?.[0]).toBe(
-      "https://api.atlassian.com/v2/orgs/org-1/directories/dir-1/users/target-1/restore",
+      "https://api.atlassian.com/admin/v2/orgs/org-1/directories/dir-1/users/target-1/restore",
     );
     expect(calls[2]?.[0]).toBe(
-      "https://api.atlassian.com/v2/orgs/org-1/directories/dir-1/groups/group-1/memberships",
+      "https://api.atlassian.com/admin/v2/orgs/org-1/directories/dir-1/groups/group-1/memberships",
     );
   });
 

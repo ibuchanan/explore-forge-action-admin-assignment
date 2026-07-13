@@ -9,6 +9,7 @@ import { parse as parseYaml } from "yaml";
 export interface ManifestFunction {
   key: string;
   handler: string;
+  timeoutSeconds?: number;
 }
 
 export interface AssetsImportTypeModule {
@@ -53,6 +54,9 @@ export interface RovoActionModule {
   name: string;
   actionVerb: string;
   description: string;
+  config?: {
+    resource?: string;
+  };
 }
 
 export interface JiraWorkflowAutomationModule {
@@ -106,6 +110,11 @@ export function getManifestHandlerReferences(
   manifest: ParsedManifest,
 ): Array<{ moduleType: string; key: string; handler: string }> {
   const refs: Array<{ moduleType: string; key: string; handler: string }> = [];
+  const functionHandlersByKey = new Map(
+    (manifest.modules.function || []).map((func) => [func.key, func.handler]),
+  );
+  const resolveFunctionHandler = (functionKey: string): string =>
+    functionHandlersByKey.get(functionKey) ?? `src/index.ts#${functionKey}`;
 
   for (const func of manifest.modules.function || []) {
     refs.push({ moduleType: "function", key: func.key, handler: func.handler });
@@ -115,7 +124,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "consumer",
       key: consumer.key,
-      handler: `src/index.ts#${consumer.function}`,
+      handler: resolveFunctionHandler(consumer.function),
     });
   }
 
@@ -123,7 +132,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "scheduledTrigger",
       key: trigger.key,
-      handler: `src/index.ts#${trigger.function}`,
+      handler: resolveFunctionHandler(trigger.function),
     });
   }
 
@@ -131,7 +140,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "webtrigger",
       key: trigger.key,
-      handler: `src/index.ts#${trigger.function}`,
+      handler: resolveFunctionHandler(trigger.function),
     });
   }
 
@@ -141,7 +150,7 @@ export function getManifestHandlerReferences(
       refs.push({
         moduleType: "trigger",
         key: trigger.key,
-        handler: `src/index.ts#${trigger.function}`,
+        handler: resolveFunctionHandler(trigger.function),
       });
     }
   }
@@ -150,7 +159,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "action",
       key: action.key,
-      handler: `src/index.ts#${action.function}`,
+      handler: resolveFunctionHandler(action.function),
     });
   }
 
@@ -158,7 +167,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "jira:workflowValidator",
       key: validator.key,
-      handler: `src/index.ts#${validator.function}`,
+      handler: resolveFunctionHandler(validator.function),
     });
   }
 
@@ -166,7 +175,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "jira:workflowCondition",
       key: condition.key,
-      handler: `src/index.ts#${condition.function}`,
+      handler: resolveFunctionHandler(condition.function),
     });
   }
 
@@ -175,7 +184,7 @@ export function getManifestHandlerReferences(
     refs.push({
       moduleType: "jira:workflowPostFunction",
       key: postFunction.key,
-      handler: `src/index.ts#${postFunction.function}`,
+      handler: resolveFunctionHandler(postFunction.function),
     });
   }
 

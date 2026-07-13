@@ -2,7 +2,7 @@ import api, { type APIResponse } from "@forge/api";
 import type { ProblemDetails } from "@forge-ahead/errors";
 import { err, ok, type Result, StandardError } from "@forge-ahead/errors";
 
-const ADMIN_API_BASE_URL = "https://api.atlassian.com";
+const ADMIN_API_BASE_URL = "https://api.atlassian.com/admin";
 const DEFAULT_MAX_RETRIES = 2;
 const TRANSIENT_ADMIN_FAILURE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 const BASE_RETRY_DELAY_MS = 250;

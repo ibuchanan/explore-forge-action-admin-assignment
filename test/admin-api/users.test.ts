@@ -128,7 +128,7 @@ describe("restoreTargetUserAccess", () => {
       throw new Error("expected api.fetch to have been called");
     }
     expect(call[0]).toBe(
-      "https://api.atlassian.com/v2/orgs/org-1/directories/dir-1/users/acc-1/restore",
+      "https://api.atlassian.com/admin/v2/orgs/org-1/directories/dir-1/users/acc-1/restore",
     );
   });
 
