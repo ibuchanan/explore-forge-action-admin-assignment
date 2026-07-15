@@ -62,7 +62,7 @@
     "archunit": "^2.3",
     "lefthook": "^2.1",
     "size-limit": "^12.1",
-    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep",
+    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep#v0.2.0",
     "typescript": "^5.9",
     "vitest": "^4.1",
     "yaml": "^2.9"
