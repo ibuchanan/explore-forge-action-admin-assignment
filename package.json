@@ -14,7 +14,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "changelog": "echo 'Not implemented'",
+    "changelog": "touch CHANGELOG.md && git cliff --offline --unreleased --prepend CHANGELOG.md",
     "check": "npm run format:check && npm run typecheck  && npm run lint && npm run test",
     "clean": "rm -rf ./node_modules && rm package-lock.json && rm -rf ./dist",
     "dev": "tsc -p tsconfig.build.json --watch",
