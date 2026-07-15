@@ -8,6 +8,7 @@ import {
   getStoredResolvedConfig,
   storeResolvedConfig,
 } from "../config-health/store";
+import { logger } from "../logging";
 import {
   parseSelectedGroupKeys,
   parseTargetUserEmails,
@@ -162,14 +163,17 @@ export async function enqueueAccessRestorationBatch(
       enqueuedCount += eventsChunk.length - failedCount;
 
       for (const failedEvent of error.failedEvents) {
-        console.log({
-          event: "admin-assignment-batch-enqueue-failure",
-          batchId,
-          targetUserEmail: (
-            failedEvent.event.body as unknown as BatchQueueEventBody
-          ).targetUserEmail,
-          errorMessage: failedEvent.errorMessage,
-        });
+        logger.warn(
+          {
+            event: "admin-assignment-batch-enqueue-failure",
+            batchId,
+            targetUserEmail: (
+              failedEvent.event.body as unknown as BatchQueueEventBody
+            ).targetUserEmail,
+            errorMessage: failedEvent.errorMessage,
+          },
+          "Batch Access Restoration enqueue partially failed",
+        );
       }
     }
   }

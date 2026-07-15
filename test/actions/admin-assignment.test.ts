@@ -14,6 +14,7 @@ import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
 import type { ResolvedConfig } from "../../src/config/resolved-config";
 import { parseSourceConfig } from "../../src/config/source-config";
 import { restoreAccess } from "../../src/actions/admin-assignment";
+import { logger } from "../../src/logging";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },
@@ -267,7 +268,7 @@ describe("restoreAccess", () => {
   });
 
   it("includes the Batch ID in the Audit Record when the payload carries one", async () => {
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const logSpy = vi.spyOn(logger, "info").mockImplementation(() => undefined);
     setValidEnv();
     kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(
@@ -306,7 +307,7 @@ describe("restoreAccess", () => {
   });
 
   it("omits the batchId field entirely from the Audit Record for a single-user run without one", async () => {
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const logSpy = vi.spyOn(logger, "info").mockImplementation(() => undefined);
     setValidEnv();
     kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(
@@ -344,7 +345,9 @@ describe("restoreAccess", () => {
   });
 
   it("never logs the Service Credential in the Audit Record on success or failure", async () => {
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const logSpy = vi
+      .spyOn(logger, "error")
+      .mockImplementation(() => undefined);
     setValidEnv();
     kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(

@@ -1,5 +1,6 @@
 import { findGroupByName } from "../admin-api/groups";
 import { findUserByEmail } from "../admin-api/users";
+import { logger } from "../logging";
 import { computeSourceConfigFingerprint } from "./fingerprint";
 import type { SourceConfig } from "./source-config";
 
@@ -44,6 +45,15 @@ export async function resolveConfig(
     );
 
     if (result.isErr()) {
+      logger.warn(
+        {
+          event: "resolve-config-lookup-failed",
+          lookupKind: "authorizedInitiatorEmail",
+          status: result.error.status,
+          detail: result.error.detail,
+        },
+        "Authorized Initiator Email lookup failed",
+      );
       messages.push(
         `Authorized Initiator Email did not resolve to exactly one account: ${result.error.detail}`,
       );
@@ -64,6 +74,16 @@ export async function resolveConfig(
     );
 
     if (result.isErr()) {
+      logger.warn(
+        {
+          event: "resolve-config-lookup-failed",
+          lookupKind: "allowedGroupName",
+          groupName: group.name,
+          status: result.error.status,
+          detail: result.error.detail,
+        },
+        "Allowed Group Name lookup failed",
+      );
       messages.push(
         `Allowed Group Name "${group.name}" did not resolve to exactly one group: ${result.error.detail}`,
       );

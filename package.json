@@ -46,6 +46,7 @@
   "dependencies": {
     "@forge-ahead/atlassian-api-types": "github:ibuchanan/forge-ahead-atlassian-api-types#0.1.0",
     "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors#0.1.0",
+    "@forge-ahead/logging": "github:ibuchanan/forge-ahead-logging#v0.2.0",
     "@forge/api": "^8.0",
     "@forge/events": "^3.0.1",
     "@forge/kvs": "^2.0.1",
@@ -76,6 +77,7 @@
     "redocly@1.0.0": true,
     "github:ibuchanan/forge-ahead-atlassian-api-types#c1120db3d1b1a2455acd72b05238d3a48226b983": true,
     "github:ibuchanan/forge-ahead-errors#1b89e19c0f9bcf9a0522300684f85869469453ce": true,
+    "github:ibuchanan/forge-ahead-logging#b2f2b0a39dde8357556130380c9795240d8f2af7": true,
     "@ast-grep/cli@0.44.1": true
   },
   "size-limit": [

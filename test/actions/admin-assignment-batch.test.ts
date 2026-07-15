@@ -14,6 +14,7 @@ import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
 import type { ResolvedConfig } from "../../src/config/resolved-config";
 import { parseSourceConfig } from "../../src/config/source-config";
 import { enqueueAccessRestorationBatch } from "../../src/actions/admin-assignment-batch";
+import { logger } from "../../src/logging";
 
 vi.mock("@forge/api", () => ({
   default: { fetch: vi.fn() },
@@ -187,7 +188,7 @@ describe("enqueueAccessRestorationBatch", () => {
   });
 
   it("reports an accurate enqueuedCount and logs each un-enqueued email when a push partially fails", async () => {
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const logSpy = vi.spyOn(logger, "warn").mockImplementation(() => undefined);
     setValidEnv();
     kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
 

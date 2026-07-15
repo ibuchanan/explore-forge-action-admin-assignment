@@ -8,6 +8,7 @@ import {
   getStoredResolvedConfig,
   storeResolvedConfig,
 } from "../config-health/store";
+import { logger } from "../logging";
 import {
   parseSelectedGroupKeys,
   planAccessRestoration,
@@ -31,6 +32,7 @@ interface AuditStep {
   step: string;
   outcome: "success" | "failure" | "skipped";
   detail?: string;
+  status?: number;
 }
 
 function problem(status: number, detail: string): ProblemDetails {
@@ -46,19 +48,27 @@ export async function restoreAccess(
   let sourceConfigFingerprint: string | undefined;
 
   function fail(step: string, problemDetails: ProblemDetails): never {
-    steps.push({ step, outcome: "failure", detail: problemDetails.detail });
-    console.log({
-      event: "admin-assignment-audit",
-      ...(payload.batchId ? { batchId: payload.batchId } : {}),
-      initiatorAccountId: payload.initiatorAccountId,
-      targetUserEmail: payload.targetUserEmail,
-      resolvedTargetAccountId,
-      selectedGroupKeys,
-      sourceConfigFingerprint,
-      steps,
-      status: "failed",
-      failureCategory: step,
+    steps.push({
+      step,
+      outcome: "failure",
+      detail: problemDetails.detail,
+      status: problemDetails.status,
     });
+    logger.error(
+      {
+        event: "admin-assignment-audit",
+        ...(payload.batchId ? { batchId: payload.batchId } : {}),
+        initiatorAccountId: payload.initiatorAccountId,
+        targetUserEmail: payload.targetUserEmail,
+        resolvedTargetAccountId,
+        selectedGroupKeys,
+        sourceConfigFingerprint,
+        steps,
+        status: "failed",
+        failureCategory: step,
+      },
+      "Access Restoration failed",
+    );
     throw new Error(
       `Access Restoration failed at step "${step}": ${problemDetails.detail}`,
     );
@@ -195,17 +205,20 @@ export async function restoreAccess(
     });
   }
 
-  console.log({
-    event: "admin-assignment-audit",
-    ...(payload.batchId ? { batchId: payload.batchId } : {}),
-    initiatorAccountId,
-    targetUserEmail,
-    resolvedTargetAccountId,
-    selectedGroupKeys,
-    sourceConfigFingerprint,
-    steps,
-    status: "succeeded",
-  });
+  logger.info(
+    {
+      event: "admin-assignment-audit",
+      ...(payload.batchId ? { batchId: payload.batchId } : {}),
+      initiatorAccountId,
+      targetUserEmail,
+      resolvedTargetAccountId,
+      selectedGroupKeys,
+      sourceConfigFingerprint,
+      steps,
+      status: "succeeded",
+    },
+    "Access Restoration succeeded",
+  );
 
   return {
     status: "succeeded",

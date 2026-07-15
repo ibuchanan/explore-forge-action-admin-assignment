@@ -1,6 +1,7 @@
 import api, { type APIResponse } from "@forge/api";
 import type { ProblemDetails } from "@forge-ahead/errors";
 import { err, ok, type Result, StandardError } from "@forge-ahead/errors";
+import { logger } from "../logging";
 
 const ADMIN_API_BASE_URL = "https://api.atlassian.com/admin";
 const DEFAULT_MAX_RETRIES = 2;
@@ -82,13 +83,16 @@ export async function sendAdminApiRequest(
       return ok(response);
     }
 
-    console.log({
-      event: "admin-api-retry",
-      path: request.path,
-      status: response.status,
-      attempt: attempt + 1,
-      maxRetries,
-    });
+    logger.warn(
+      {
+        event: "admin-api-retry",
+        path: request.path,
+        status: response.status,
+        attempt: attempt + 1,
+        maxRetries,
+      },
+      "Admin API request will be retried",
+    );
 
     await sleep(
       computeRetryDelayMs(attempt, response.headers.get("Retry-After")),
