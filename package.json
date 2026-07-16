@@ -44,9 +44,9 @@
     "@atlaskit/forge-react-types": "2.0.0"
   },
   "dependencies": {
-    "@forge-ahead/atlassian-api-types": "github:ibuchanan/forge-ahead-atlassian-api-types#0.1.0",
-    "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors#0.1.0",
-    "@forge-ahead/logging": "github:ibuchanan/forge-ahead-logging#v0.2.0",
+    "@forge-ahead/atlassian-api-types": "github:ibuchanan/forge-ahead-atlassian-api-types",
+    "@forge-ahead/errors": "github:ibuchanan/forge-ahead-errors",
+    "@forge-ahead/logging": "github:ibuchanan/forge-ahead-logging",
     "@forge/api": "^8.0",
     "@forge/events": "^3.0.1",
     "@forge/kvs": "^2.0.1",
@@ -62,7 +62,7 @@
     "archunit": "^2.3",
     "lefthook": "^2.1",
     "size-limit": "^12.1",
-    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep#v0.2.0",
+    "tool-forge-prelint-ast-grep": "github:ibuchanan/tool-forge-prelint-ast-grep",
     "typescript": "^5.9",
     "vitest": "^4.1",
     "yaml": "^2.9"
@@ -75,10 +75,10 @@
     "iframe-resizer@4.4.5": true,
     "lefthook@2.1.9": true,
     "redocly@1.0.0": true,
-    "github:ibuchanan/forge-ahead-atlassian-api-types#c1120db3d1b1a2455acd72b05238d3a48226b983": true,
-    "github:ibuchanan/forge-ahead-errors#1b89e19c0f9bcf9a0522300684f85869469453ce": true,
     "github:ibuchanan/forge-ahead-logging#b2f2b0a39dde8357556130380c9795240d8f2af7": true,
-    "@ast-grep/cli@0.44.1": true
+    "@ast-grep/cli@0.44.1": true,
+    "github:ibuchanan/forge-ahead-errors#e50cc975edf827b20eb1468ef5b4dfb583fcfde0": true,
+    "github:ibuchanan/forge-ahead-atlassian-api-types#c1a069df9b28eec21c1b09f03febebbc2a6b7316": true
   },
   "size-limit": [
     {
