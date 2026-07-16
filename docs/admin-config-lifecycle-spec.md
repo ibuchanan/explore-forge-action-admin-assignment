@@ -33,7 +33,7 @@ A Jira App Administrator can view, edit, and validate Source Config from a Jira 
 ## Non-Goals
 
 - This spec does not change the Access Restoration or Batch Access Restoration business operation, Runtime Input contract, Lookup Budget semantics, Cloud Admin write order, idempotency behavior, or audit logging contract. It does change how Source Config and Config Health are loaded and refreshed before those operations run.
-- This spec does not move `ADMIN_ASSIGNMENT_API_TOKEN` out of Forge environment variables. The Service Credential remains a plain encrypted Forge env var to minimize its exposure surface — it is not surfaced through any resolver or UI round-trip.
+- This spec does not move `ORGANIZATION_API_KEY` out of Forge environment variables. The Service Credential remains a plain encrypted Forge env var to minimize its exposure surface — it is not surfaced through any resolver or UI round-trip.
 - This spec does not add durable audit history for config edits.
 - This spec does not add a public API for editing Source Config outside the Jira admin UI.
 - This spec does not add an app-specific allowlist for Jira App Administrators. Access to the Forge `jira:adminPage` Configure and status surfaces is the admin authorization boundary.
@@ -61,7 +61,7 @@ A Jira App Administrator can view, edit, and validate Source Config from a Jira 
   - numeric Lookup Budget fields
 - The resolver assembles the same `SourceConfig` object from structured form payloads and uses a shared `validateSourceConfig(candidate: unknown)` helper as the backend schema gate.
 - A raw JSON preview/import affordance can be added later, but raw JSON is not the primary editing surface.
-- The Configure page includes a deliberate Reset/Clear Source Config action. It asks for confirmation, writes `{ state: "unconfigured" }`, stores inactive Config Health with a clear non-secret message such as "Source Config is not configured", and leaves `ADMIN_ASSIGNMENT_API_TOKEN` unchanged.
+- The Configure page includes a deliberate Reset/Clear Source Config action. It asks for confirmation, writes `{ state: "unconfigured" }`, stores inactive Config Health with a clear non-secret message such as "Source Config is not configured", and leaves `ORGANIZATION_API_KEY` unchanged.
 
 ## Manifest Changes
 
@@ -85,7 +85,7 @@ Add three `jira:adminPage` modules to `manifest.yml`, alongside the existing `au
 - Do not export the raw Zod `sourceConfigSchema` as the resolver contract. Keep Zod as an implementation detail.
 - `saveConfig` rejects malformed form/schema input without writing Source Config.
 - `saveConfig` persists schema-valid Source Config even when resolution fails, then immediately re-runs the existing `resolveConfig`/`storeResolvedConfig` logic. The saved Source Config represents the Jira App Administrator's current intended configuration; Config Health represents whether that saved configuration is runnable.
-- If `ADMIN_ASSIGNMENT_API_TOKEN` is missing when schema-valid Source Config is saved, `saveConfig` still persists the configured Source Config record and stores inactive Config Health with a sanitized message such as `ADMIN_ASSIGNMENT_API_TOKEN is not set`.
+- If `ORGANIZATION_API_KEY` is missing when schema-valid Source Config is saved, `saveConfig` still persists the configured Source Config record and stores inactive Config Health with a sanitized message such as `ORGANIZATION_API_KEY is not set`.
 - The save response distinguishes "saved and active" from "saved but inactive" so the admin gets pass/fail feedback at save time instead of discovering a problem later via a failed Automation run or the next Lifecycle Validation.
 - A newly saved Source Config replaces the previous stored Resolved Config result immediately. If the new Source Config resolves to inactive Config Health, store that inactive result tied to the new Source Config fingerprint; do not keep using the last active Resolved Config as a fallback.
 - Inactive Resolved Config may retain partial successful resolution results for admin diagnostics, matching the current `resolveConfig()` behavior. Runtime execution must treat any inactive Config Health as unusable regardless of partial identifiers.
@@ -133,4 +133,4 @@ When KVS has no Source Config record but `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` i
 
 ## Open Questions
 
-None outstanding. The decision to keep `ADMIN_ASSIGNMENT_API_TOKEN` in Forge environment variables is recorded in [ADR 0002](adr/0002-keep-service-credential-in-forge-environment.md).
+None outstanding. The decision to keep `ORGANIZATION_API_KEY` in Forge environment variables is recorded in [ADR 0002](adr/0002-keep-service-credential-in-forge-environment.md).

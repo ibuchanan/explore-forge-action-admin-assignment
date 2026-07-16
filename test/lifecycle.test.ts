@@ -47,7 +47,7 @@ describe("runLifecycleValidation", () => {
     vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = undefined;
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
+    process.env.ORGANIZATION_API_KEY = undefined;
   });
 
   afterEach(() => {
@@ -57,7 +57,7 @@ describe("runLifecycleValidation", () => {
   it("seeds a configured Source Config from a valid legacy env var when no KVS record exists, then validates active", async () => {
     seedExistingRecord(undefined);
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = validSourceConfigJson;
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     vi.mocked(api.fetch)
       .mockResolvedValueOnce(
         mockApiResponse(200, {
@@ -97,7 +97,7 @@ describe("runLifecycleValidation", () => {
 
   it("stores an intentionally unconfigured Source Config and inactive Config Health when no KVS record exists and the legacy env var is absent", async () => {
     seedExistingRecord(undefined);
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
 
     await expect(runLifecycleValidation()).resolves.toBeUndefined();
 
@@ -142,7 +142,7 @@ describe("runLifecycleValidation", () => {
       },
     });
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = validSourceConfigJson;
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     vi.mocked(api.fetch)
       .mockResolvedValueOnce(mockApiResponse(200, { data: [], links: {} }))
       .mockResolvedValueOnce(mockApiResponse(200, { data: [], links: {} }));
@@ -157,7 +157,7 @@ describe("runLifecycleValidation", () => {
   it("does not reseed from the legacy env var when an intentionally unconfigured Source Config record already exists", async () => {
     seedExistingRecord({ state: "unconfigured" });
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = validSourceConfigJson;
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
 
     await runLifecycleValidation();
 

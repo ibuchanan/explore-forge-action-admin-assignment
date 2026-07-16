@@ -65,7 +65,7 @@ function seedKvs(resolvedConfig?: ResolvedConfig) {
 }
 
 function setValidEnv() {
-  process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+  process.env.ORGANIZATION_API_KEY = "secret-token";
 }
 
 describe("restoreAccess", () => {
@@ -76,7 +76,7 @@ describe("restoreAccess", () => {
     vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = undefined;
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
+    process.env.ORGANIZATION_API_KEY = undefined;
   });
 
   afterEach(() => {

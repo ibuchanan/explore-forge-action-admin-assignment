@@ -54,8 +54,9 @@ Run `secretspec check --provider dotenv` and follow the prompts to fill in:
 - `FORGE_ENVIRONMENT`, `FORGE_SITE`, and `FORGE_PRODUCT`.
   Even though the app operates on Org-level APIs,
   the app itself must be installed into a specific Jira site.
-- `ADMIN_ASSIGNMENT_API_TOKEN`,
-  [an org admin API key](https://support.atlassian.com/organization-administration/docs/manage-an-organization-with-the-admin-apis/).
+- `ORGANIZATION_API_KEY`, the app's Service Credential. You can obtain it by
+  creating an [API key](https://support.atlassian.com/organization-administration/docs/manage-an-organization-with-the-admin-apis/)
+  for your organization in the Atlassian Admin Hub, then populate it in this env var.
 - `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` (optional),
   a JSON object describing the org, directory, Authorized Initiator emails, and Allowed Groups.
   See below for elaboration on that structure.
@@ -63,12 +64,12 @@ Run `secretspec check --provider dotenv` and follow the prompts to fill in:
 Then run:
 
 ```sh
-npm install                         # Usually only needed once, or if changes are made to npm dependencies
-npm run check                       # Runs various checks to make sure the app is in good condition
-npm run forge:register              # Only do this once to change the appId in the manifest
-npm run forge:variables:set:dotenv  # Repeat whenever there are changes to the .env file
-npm run forge:deploy                # Deploy after any code changes
-npm run forge:install               # Usually only needed once
+npm install                   # Usually only needed once, or if changes are made to npm dependencies
+npm run check                 # Runs various checks to make sure the app is in good condition
+npm run forge:register        # Only do this once to change the appId in the manifest
+npm run forge:variables:set   # Repeat whenever there are changes to the .env file
+npm run forge:deploy          # Deploy after any code changes
+npm run forge:install         # Usually only needed once
 ```
 
 ## Configuration

@@ -58,7 +58,7 @@ describe("runSourceConfigValidation", () => {
     vi.mocked(api.fetch).mockReset();
     vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
+    process.env.ORGANIZATION_API_KEY = undefined;
   });
 
   afterEach(() => {
@@ -93,7 +93,7 @@ describe("runSourceConfigValidation", () => {
     expect(result.configHealth.active).toBe(false);
     expect(
       result.configHealth.messages.some((message) =>
-        message.includes("ADMIN_ASSIGNMENT_API_TOKEN"),
+        message.includes("ORGANIZATION_API_KEY"),
       ),
     ).toBe(true);
     expect(result.sourceConfigFingerprint).toBe(fingerprint);
@@ -101,7 +101,7 @@ describe("runSourceConfigValidation", () => {
   });
 
   it("resolves and stores an active Resolved Config when the Service Credential and Source Config are both valid", async () => {
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     seedKvs({ sourceConfigRecord: { state: "configured", sourceConfig } });
     vi.mocked(api.fetch)
       .mockResolvedValueOnce(
@@ -131,7 +131,7 @@ describe("ensureActiveResolvedConfig", () => {
     vi.mocked(api.fetch).mockReset();
     vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
+    process.env.ORGANIZATION_API_KEY = undefined;
   });
 
   afterEach(() => {
@@ -180,7 +180,7 @@ describe("ensureActiveResolvedConfig", () => {
   });
 
   it("refreshes through the shared validation path when the stored fingerprint is stale, then succeeds", async () => {
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     const staleResolvedConfig: ResolvedConfig = {
       sourceConfigFingerprint: "stale-fingerprint",
       authorizedInitiatorAccountIds: [],

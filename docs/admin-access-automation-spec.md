@@ -60,10 +60,10 @@ The only app-owned Environment Configuration is the Service Credential, kept as 
 Required variable:
 
 ```text
-ADMIN_ASSIGNMENT_API_TOKEN
+ORGANIZATION_API_KEY
 ```
 
-`ADMIN_ASSIGNMENT_API_TOKEN` must be stored as an encrypted Forge environment variable. It is not part of the Source Config fingerprint.
+`ORGANIZATION_API_KEY` holds the Service Credential — an [API key](https://support.atlassian.com/organization-administration/docs/manage-an-organization-with-the-admin-apis/) for the organization, created in the Atlassian Admin Hub — and must be stored as an encrypted Forge environment variable. It is not part of the Source Config fingerprint.
 
 ## Source Config Shape
 

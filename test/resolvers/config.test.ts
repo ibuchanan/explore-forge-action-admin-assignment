@@ -92,7 +92,7 @@ describe("saveConfig", () => {
     vi.mocked(api.fetch).mockReset();
     vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
+    process.env.ORGANIZATION_API_KEY = undefined;
   });
 
   afterEach(() => {
@@ -110,7 +110,7 @@ describe("saveConfig", () => {
 
   it("saves and reports saved-active when the Source Config resolves successfully", async () => {
     stubStore(undefined);
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     vi.mocked(api.fetch)
       .mockResolvedValueOnce(
         mockApiResponse(200, {
@@ -137,7 +137,7 @@ describe("saveConfig", () => {
 
   it("saves and reports saved-inactive, but still persists Source Config, when resolution fails", async () => {
     stubStore(undefined);
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     vi.mocked(api.fetch).mockResolvedValue(
       mockApiResponse(200, { data: [], links: {} }),
     );

@@ -38,10 +38,10 @@ async function validateSourceConfigRecord(
   }
 
   const fingerprint = computeSourceConfigFingerprint(record.sourceConfig);
-  const apiToken = process.env.ADMIN_ASSIGNMENT_API_TOKEN;
+  const apiToken = process.env.ORGANIZATION_API_KEY;
   if (!apiToken) {
     return buildInactiveResolvedConfig(
-      ["ADMIN_ASSIGNMENT_API_TOKEN is not set"],
+      ["ORGANIZATION_API_KEY is not set"],
       fingerprint,
     );
   }

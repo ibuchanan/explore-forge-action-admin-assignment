@@ -55,7 +55,7 @@ describe("getStatus", () => {
     vi.mocked(api.fetch).mockReset();
     vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
+    process.env.ORGANIZATION_API_KEY = undefined;
   });
 
   afterEach(() => {
@@ -77,7 +77,7 @@ describe("getStatus", () => {
       sourceConfigRecord: { state: "configured", sourceConfig },
       resolvedConfig: undefined,
     });
-    process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
+    process.env.ORGANIZATION_API_KEY = "secret-token";
     vi.mocked(api.fetch)
       .mockResolvedValueOnce(
         mockApiResponse(200, {

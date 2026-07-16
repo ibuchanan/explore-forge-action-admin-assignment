@@ -60,7 +60,7 @@ export async function enqueueAccessRestorationBatch(
   }
   const initiatorAccountId = payload.initiatorAccountId;
 
-  const apiToken = process.env.ADMIN_ASSIGNMENT_API_TOKEN;
+  const apiToken = process.env.ORGANIZATION_API_KEY;
   if (!apiToken) {
     fail(
       "load-source-config",
