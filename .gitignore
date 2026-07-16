@@ -31,3 +31,5 @@ package-lock.json
 !/scripts/forge-vars-from-env.sh
 # CocoIndex Code (ccc)
 /.cocoindex_code/
+# Dagger generated SDK client
+/.dagger/
