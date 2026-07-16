@@ -17,9 +17,10 @@ The action restores access for one Target User when deliberately run by an Autho
 - The action does not assign organization admin or site admin roles directly.
 - The action does not accept arbitrary group IDs, group names, or emails for group membership.
 - The action does not support scheduled, webhook, system-triggered, or indirect automation runs.
-- The app does not provide an editable Forge configuration UI.
 - The app does not maintain durable per-run audit history.
 - The initial version does not provide a separate operator-triggered config validation endpoint.
+
+Source Config editing and the admin status dashboard are specified separately in [Admin Config Lifecycle Spec](admin-config-lifecycle-spec.md); this spec's Non-Goals above no longer include lacking an editable Forge configuration UI.
 
 ## Atlassian APIs
 
@@ -54,18 +55,19 @@ References:
 
 ## Environment Configuration
 
-The only app-owned configuration surface is Forge environment variables.
+The only app-owned Environment Configuration is the Service Credential, kept as a deployment-managed Forge environment variable rather than moved into the app's own storage — see [ADR 0002](adr/0002-keep-service-credential-in-forge-environment.md).
 
-Required variables:
+Required variable:
 
 ```text
-ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON
 ADMIN_ASSIGNMENT_API_TOKEN
 ```
 
 `ADMIN_ASSIGNMENT_API_TOKEN` must be stored as an encrypted Forge environment variable. It is not part of the Source Config fingerprint.
 
-`ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` is a structured JSON object:
+## Source Config Shape
+
+Source Config is admin-editable app configuration, not Environment Configuration. A Jira App Administrator edits it from the Configure admin page, described in [Admin Config Lifecycle Spec](admin-config-lifecycle-spec.md); it is stored in Forge KVS rather than `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON`, which is now legacy migration input only. Source Config is a structured object:
 
 ```json
 {
@@ -333,7 +335,7 @@ Implementation will likely require:
 - removal of Jira issue comment scopes from the sample app if no longer needed
 - action input replacement with `initiatorAccountId`, `targetUserEmail`, and `selectedGroupKeys`
 - separate native configuration resources for single-user and batch actions
-- no editable action configuration UI, or a minimal status-only UI if Forge requires a resource
+- `jira:adminPage` modules for the Configure and Admin status surfaces, per [Admin Config Lifecycle Spec](admin-config-lifecycle-spec.md)
 
 Manifest changes require Forge deploy and reinstall/upgrade where scopes or egress change.
 

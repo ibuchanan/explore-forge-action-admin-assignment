@@ -18,7 +18,7 @@ interface ActionConfigProps {
 }
 
 const selectedGroupKeysDescription =
-  "Comma-separated Group Keys from ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON.";
+  "Comma-separated Group Keys from the app's Configure page (Allowed Groups).";
 
 function RequiredTextField({
   name,
