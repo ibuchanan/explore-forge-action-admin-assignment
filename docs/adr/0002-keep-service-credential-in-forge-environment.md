@@ -1,0 +1,3 @@
+# Keep the Service Credential in Forge environment variables
+
+Source Config is moving from `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` to a KVS-backed Jira admin Configure page, but the Service Credential remains in `ADMIN_ASSIGNMENT_API_TOKEN` as deployment-managed Environment Configuration. We are deliberately not moving the organization API key to `kvs.setSecret`, because storing it through admin UI resolvers would increase its exposure surface and couple secret rotation to the app's Configure page. The tradeoff is that Jira App Administrators can stage and validate non-secret Source Config in the UI, but deployment operators still own Service Credential provisioning and rotation outside the app.

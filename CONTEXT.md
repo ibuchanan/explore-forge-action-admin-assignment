@@ -16,6 +16,10 @@ _Avoid_: runtime identity, display name
 An automation execution started by a present human user from an Atlassian UI control.
 _Avoid_: scheduled run, webhook event, system-triggered run
 
+**Jira App Administrator**:
+A Jira administrator who can access the app's Jira admin pages to view and edit Source Config.
+_Avoid_: authorized initiator, connection user, organization administrator
+
 **Connection User**:
 The Atlassian account associated with the Forge Automation action connection.
 _Avoid_: initiator, triggering user
@@ -25,16 +29,16 @@ The organization API key used by the app to call Atlassian Administration APIs.
 _Avoid_: initiator token, connection user token
 
 **Config Health**:
-The app's stored assessment of whether environment-provided configuration is valid enough to run.
+The app's stored current assessment of whether Source Config and the Service Credential are valid enough to run, including when that assessment was made.
 _Avoid_: UI configuration, live feature flag
 
 **Lifecycle Validation**:
-The validation and resolution of Environment Configuration when the app is installed or upgraded.
+The validation and resolution of Source Config and the Service Credential when the app is installed or upgraded.
 _Avoid_: runtime execution, manual trigger
 
 **Source Config**:
-The human-editable environment configuration used to describe authorized people and groups.
-_Avoid_: resolved config, runtime input
+The human-editable app configuration used to describe authorized people and groups after setup or migration.
+_Avoid_: resolved config, runtime input, environment variable
 
 **Resolved Config**:
 The app-stored canonical identifiers derived from Source Config.
@@ -65,8 +69,8 @@ A value the Authorized Initiator provides while manually starting the automation
 _Avoid_: action configuration, environment variable
 
 **Environment Configuration**:
-The only supported app-owned configuration surface for access restoration.
-_Avoid_: Forge configuration UI, Automation action UI
+Forge environment variables that hold deployment-managed settings; for access restoration, this contains only the Service Credential.
+_Avoid_: Source Config, Forge configuration UI, Automation action UI
 
 **Allowed Group**:
 A configured Atlassian group that the action is permitted to add a Target User to.
@@ -132,6 +136,8 @@ _Avoid_: audit record, raw API response
 - **Authorized Initiator Emails** are provided in Source Config as a JSON array.
 - An **Interactive Initiation** must identify exactly one **Authorized Initiator**.
 - An **Interactive Initiation** is the only supported way to run the access restoration action.
+- A **Jira App Administrator** can edit **Source Config** but is not automatically an **Authorized Initiator**.
+- A **Jira App Administrator** may configure **Authorized Initiator Emails**.
 - A **Target User** must be provided as **Runtime Input**.
 - A **Target User Email** must resolve to exactly one **Target User** before Access Restoration can run.
 - One or more **Selected Groups** must be provided as **Runtime Input**.
@@ -140,7 +146,7 @@ _Avoid_: audit record, raw API response
 - **Selected Groups** are passed as **Group Keys**, not group IDs or group names.
 - Each **Allowed Group** maps one **Group Key** to one **Directory Group ID**.
 - Each **Allowed Group Name** must resolve to exactly one **Allowed Group**.
-- The number of configured **Allowed Groups** is determined by environment configuration, not by app logic.
+- The number of configured **Allowed Groups** is determined by **Source Config**, not by app logic.
 - **Authorized Initiators**, **Target Users**, and **Allowed Groups** must resolve within the same **Configured Directory**.
 - **Access Restoration** restores directory access before adding group memberships.
 - **Access Restoration** does not roll back earlier successful changes when a later change fails.
@@ -158,13 +164,20 @@ _Avoid_: audit record, raw API response
 - Successful Access Restoration may return a **Success Summary**.
 - A **Connection User** executes the Forge action connection but is not treated as the **Authorized Initiator**.
 - A **Service Credential** performs Atlassian Administration API calls but does not authorize an Interactive Initiation.
-- **Config Health** is stored by the app after lifecycle validation.
+- **Config Health** is stored by the app after validation.
 - Invalid **Config Health** prevents Access Restoration before any Atlassian Administration API call.
 - **Lifecycle Validation** runs when the app is installed or upgraded.
-- No separate operator-triggered validation path exists for the initial version.
+- A **Jira App Administrator** can trigger validation by saving **Source Config**.
+- A **Jira App Administrator** can trigger validation by viewing or refreshing Config Health in the admin status page.
 - **Source Config** is resolved into **Resolved Config** before Access Restoration can run.
 - **Source Config** is provided as one structured JSON object, excluding the Service Credential.
-- **Environment Configuration** is the only app-owned configuration surface.
+- **Source Config** is the runtime source of truth once configured.
+- **Source Config** may be intentionally unconfigured.
+- **Environment Configuration** may seed **Source Config** only when Source Config has never been configured.
+- An intentionally unconfigured app is not reseeded from **Environment Configuration**.
+- Schema-valid **Source Config** may be stored even when validation produces inactive **Config Health**.
+- Saving a new **Source Config** replaces the app's stored **Resolved Config** result, even when the new result has inactive **Config Health**.
+- Inactive **Config Health** may include partial **Resolved Config** identifiers for diagnostics, but runtime execution must not use them.
 - Resolving **Source Config** may call Atlassian Administration read/search APIs.
 - **Resolved Config** must match the current **Source Config Fingerprint** before Access Restoration can run.
 - Stale or missing **Resolved Config** may be refreshed during execution before any access changes.
