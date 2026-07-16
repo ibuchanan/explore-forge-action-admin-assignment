@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_LOOKUP_BUDGET,
   parseSourceConfig,
+  validateSourceConfig,
 } from "../../src/config/source-config";
 
 describe("parseSourceConfig", () => {
@@ -79,5 +80,46 @@ describe("parseSourceConfig", () => {
     const fields = result._unsafeUnwrapErr().errors.map((error) => error.field);
     expect(fields).toContain("authorizedInitiatorEmails");
     expect(fields).toContain("allowedGroups");
+  });
+});
+
+describe("validateSourceConfig", () => {
+  it("validates a structured candidate and applies default Lookup Budget values", () => {
+    const candidate = {
+      orgId: "org-1",
+      directoryId: "dir-1",
+      authorizedInitiatorEmails: ["alice@example.com"],
+      allowedGroups: [
+        {
+          key: "jira-admins",
+          label: "Jira admins",
+          name: "jira-administrators",
+        },
+      ],
+    };
+
+    const result = validateSourceConfig(candidate);
+
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual({
+      ...candidate,
+      lookup: DEFAULT_LOOKUP_BUDGET,
+    });
+  });
+
+  it("fails closed with a ValidationProblemDetails for a malformed candidate", () => {
+    const result = validateSourceConfig({ directoryId: "dir-1" });
+
+    expect(result.isErr()).toBe(true);
+    const problem = result._unsafeUnwrapErr();
+    expect(problem.status).toBe(400);
+    expect(problem.errors.some((error) => error.field === "orgId")).toBe(true);
+  });
+
+  it("fails closed for a non-object candidate", () => {
+    const result = validateSourceConfig("not an object");
+
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr().status).toBe(400);
   });
 });

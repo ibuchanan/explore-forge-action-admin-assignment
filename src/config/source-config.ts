@@ -65,21 +65,9 @@ function toValidationProblemDetails(
   };
 }
 
-export function parseSourceConfig(
-  rawJson: string,
+export function validateSourceConfig(
+  candidate: unknown,
 ): Result<SourceConfig, ValidationProblemDetails> {
-  let candidate: unknown;
-  try {
-    candidate = JSON.parse(rawJson);
-  } catch (error) {
-    return err(
-      toValidationProblemDetails(
-        error instanceof Error ? error.message : "Invalid JSON",
-        [],
-      ),
-    );
-  }
-
   const parsed = sourceConfigSchema.safeParse(candidate);
   if (!parsed.success) {
     const errors = parsed.error.issues.map((issue) => ({
@@ -101,4 +89,22 @@ export function parseSourceConfig(
   };
 
   return ok({ ...parsed.data, lookup });
+}
+
+export function parseSourceConfig(
+  rawJson: string,
+): Result<SourceConfig, ValidationProblemDetails> {
+  let candidate: unknown;
+  try {
+    candidate = JSON.parse(rawJson);
+  } catch (error) {
+    return err(
+      toValidationProblemDetails(
+        error instanceof Error ? error.message : "Invalid JSON",
+        [],
+      ),
+    );
+  }
+
+  return validateSourceConfig(candidate);
 }
