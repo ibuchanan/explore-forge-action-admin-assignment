@@ -71,14 +71,14 @@ modules:
         - avi:forge:upgraded:app
   jira:adminPage:
     - key: admin-assignment-configure-page
-      title: Configure
+      title: Break-Glass Access – Configure
       render: native
       resource: admin-configure
       resolver:
         function: adminResolver
       useAsConfig: true
     - key: admin-assignment-status-page
-      title: Admin status
+      title: Break-Glass Access – Status
       render: native
       resource: admin-status
       resolver:
