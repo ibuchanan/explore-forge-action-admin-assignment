@@ -50,19 +50,66 @@ function computeRetryDelayMs(
   return BASE_RETRY_DELAY_MS * 2 ** attempt;
 }
 
+let nextRequestId = 0;
+
+// Every outbound Admin API call funnels through here, so this is the single
+// place to log a request's start before any network traffic and its outcome
+// after. Forge invocations can time out (even mid-fetch) with no further logs
+// after that point, so the start log is what identifies the pending request
+// that was in flight when a timeout hit.
 async function performRequest(
   apiToken: string,
   request: AdminApiRequest,
 ): Promise<APIResponse> {
-  return api.fetch(`${ADMIN_API_BASE_URL}${request.path}`, {
-    method: request.method,
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
+  const requestId = ++nextRequestId;
+  const startedAt = Date.now();
+  logger.debug(
+    {
+      event: "admin-api-request-start",
+      requestId,
+      method: request.method,
+      path: request.path,
     },
-    body: request.body === undefined ? undefined : JSON.stringify(request.body),
-  });
+    "Admin API request starting",
+  );
+
+  try {
+    const response = await api.fetch(`${ADMIN_API_BASE_URL}${request.path}`, {
+      method: request.method,
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body:
+        request.body === undefined ? undefined : JSON.stringify(request.body),
+    });
+    logger.debug(
+      {
+        event: "admin-api-request-complete",
+        requestId,
+        method: request.method,
+        path: request.path,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+      },
+      "Admin API request completed",
+    );
+    return response;
+  } catch (error) {
+    logger.debug(
+      {
+        event: "admin-api-request-failed",
+        requestId,
+        method: request.method,
+        path: request.path,
+        durationMs: Date.now() - startedAt,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      },
+      "Admin API request failed",
+    );
+    throw error;
+  }
 }
 
 export async function sendAdminApiRequest(

@@ -1,6 +1,7 @@
 import api from "@forge/api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendAdminApiRequest } from "../../src/admin-api/client";
+import { logger } from "../../src/logging";
 import { mockApiResponse as jsonResponse } from "./test-helpers";
 
 vi.mock("@forge/api", () => ({
@@ -92,5 +93,78 @@ describe("sendAdminApiRequest", () => {
     expect(api.fetch).toHaveBeenCalledTimes(3);
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap().status).toBe(503);
+  });
+
+  it("logs the request start before the network call settles, then logs completion with the response status", async () => {
+    const debugSpy = vi
+      .spyOn(logger, "debug")
+      .mockImplementation(() => undefined);
+    let resolveFetch:
+      | ((response: Awaited<ReturnType<typeof api.fetch>>) => void)
+      | undefined;
+    const pending = new Promise<Awaited<ReturnType<typeof api.fetch>>>(
+      (resolve) => {
+        resolveFetch = resolve;
+      },
+    );
+    vi.mocked(api.fetch).mockReturnValueOnce(pending);
+
+    const promise = sendAdminApiRequest("secret-token", {
+      method: "GET",
+      path: "/v2/orgs/org-1/directories/dir-1/users/count",
+    });
+
+    // Let the microtask queue turn so the pre-fetch debug log runs, without
+    // letting the still-unresolved fetch settle.
+    await Promise.resolve();
+
+    expect(debugSpy).toHaveBeenCalledTimes(1);
+    expect(debugSpy.mock.calls[0]?.[0]).toMatchObject({
+      event: "admin-api-request-start",
+      method: "GET",
+      path: "/v2/orgs/org-1/directories/dir-1/users/count",
+    });
+
+    resolveFetch?.(jsonResponse(200, { ok: true }));
+    const result = await promise;
+
+    expect(result.isOk()).toBe(true);
+    expect(debugSpy).toHaveBeenCalledTimes(2);
+    expect(debugSpy.mock.calls[1]?.[0]).toMatchObject({
+      event: "admin-api-request-complete",
+      status: 200,
+    });
+
+    debugSpy.mockRestore();
+  });
+
+  it("logs a failure record when the outbound fetch itself rejects, then rethrows", async () => {
+    const debugSpy = vi
+      .spyOn(logger, "debug")
+      .mockImplementation(() => undefined);
+    vi.mocked(api.fetch).mockRejectedValueOnce(new Error("network down"));
+
+    await expect(
+      sendAdminApiRequest("secret-token", {
+        method: "GET",
+        path: "/v2/orgs/org-1/directories/dir-1/users/count",
+      }),
+    ).rejects.toThrow("network down");
+
+    const failureLog = debugSpy.mock.calls
+      .map((call) => call[0])
+      .find(
+        (entry) =>
+          typeof entry === "object" &&
+          entry !== null &&
+          "event" in entry &&
+          entry.event === "admin-api-request-failed",
+      );
+    expect(failureLog).toMatchObject({
+      event: "admin-api-request-failed",
+      errorMessage: "network down",
+    });
+
+    debugSpy.mockRestore();
   });
 });
