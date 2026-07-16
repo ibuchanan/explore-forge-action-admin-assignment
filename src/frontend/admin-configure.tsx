@@ -5,7 +5,6 @@ import ForgeReconciler, {
   Form,
   FormFooter,
   FormSection,
-  Heading,
   HelperMessage,
   Inline,
   Label,
@@ -182,7 +181,6 @@ const App = () => {
 
   return (
     <Stack space="space.300">
-      <Heading as="h1">Configure Admin Access Automation</Heading>
       <Text>
         Source Config controls who can run Access Restoration (Authorized
         Initiator Emails) and which Jira directory groups they can grant

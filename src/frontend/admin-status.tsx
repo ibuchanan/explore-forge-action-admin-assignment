@@ -2,7 +2,6 @@ import { invoke } from "@forge/bridge";
 import ForgeReconciler, {
   Box,
   Button,
-  Heading,
   Inline,
   SectionMessage,
   Stack,
@@ -46,8 +45,6 @@ const App = () => {
 
   return (
     <Stack space="space.300">
-      <Heading as="h1">Admin Access Automation status</Heading>
-
       {status.state === "unconfigured" && (
         <SectionMessage
           appearance="warning"
