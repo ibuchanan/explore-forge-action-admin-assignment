@@ -14,8 +14,13 @@ import ForgeReconciler, {
   Stack,
   Text,
   Textfield,
+  xcss,
 } from "@forge/react";
 import React, { useEffect, useState } from "react";
+
+const fieldGroupStyles = xcss({
+  marginBottom: "space.300",
+});
 
 interface AllowedGroup {
   name: string;
@@ -220,179 +225,198 @@ const App = () => {
 
       <Form onSubmit={handleSubmit}>
         <FormSection>
-          <Label labelFor="org-id">
-            Org ID
-            <RequiredAsterisk />
-          </Label>
-          <Textfield
-            id="org-id"
-            value={orgId}
-            isDisabled={busy}
-            onChange={(event) => {
-              setOrgId(event.target.value);
-            }}
-          />
-          <HelperMessage>
-            <Link
-              href="https://confluence.atlassian.com/cloudkb/retrieve-my-atlassian-cloud-organization-s-id-1207189876.html"
-              openNewTab
-            >
-              Where do I find my Org ID?
-            </Link>
-          </HelperMessage>
+          <Box xcss={fieldGroupStyles}>
+            <Label labelFor="org-id">
+              Org ID
+              <RequiredAsterisk />
+            </Label>
+            <Textfield
+              id="org-id"
+              value={orgId}
+              isDisabled={busy}
+              onChange={(event) => {
+                setOrgId(event.target.value);
+              }}
+            />
+            <HelperMessage>
+              <Link
+                href="https://confluence.atlassian.com/cloudkb/retrieve-my-atlassian-cloud-organization-s-id-1207189876.html"
+                openNewTab
+              >
+                Where do I find my Org ID?
+              </Link>
+            </HelperMessage>
+          </Box>
 
-          <Label labelFor="directory-id">
-            Directory ID
-            <RequiredAsterisk />
-          </Label>
-          <Textfield
-            id="directory-id"
-            value={directoryId}
-            isDisabled={busy}
-            onChange={(event) => {
-              setDirectoryId(event.target.value);
-            }}
-          />
-          <HelperMessage>
-            <Link
-              href="https://developer.atlassian.com/cloud/admin/organization/rest/api-group-directory/"
-              openNewTab
-            >
-              Where do I find my Directory ID?
-            </Link>
-          </HelperMessage>
+          <Box xcss={fieldGroupStyles}>
+            <Label labelFor="directory-id">
+              Directory ID
+              <RequiredAsterisk />
+            </Label>
+            <Textfield
+              id="directory-id"
+              value={directoryId}
+              isDisabled={busy}
+              onChange={(event) => {
+                setDirectoryId(event.target.value);
+              }}
+            />
+            <HelperMessage>
+              <Link
+                href="https://developer.atlassian.com/cloud/admin/organization/rest/api-group-directory/"
+                openNewTab
+              >
+                Where do I find my Directory ID?
+              </Link>
+            </HelperMessage>
+          </Box>
 
-          <Label labelFor="initiator-emails">Authorized Initiator Emails</Label>
-          <Stack space="space.100">
-            {emailRows.map((row) => (
-              <Inline key={row.id} space="space.100" alignBlock="center">
-                <Textfield
-                  value={row.value}
-                  isDisabled={busy}
-                  placeholder="person@example.com"
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setEmailRows((rows) =>
-                      rows.map((r) => (r.id === row.id ? { ...r, value } : r)),
-                    );
-                  }}
-                />
+          <Box xcss={fieldGroupStyles}>
+            <Label labelFor="initiator-emails">
+              Authorized Initiator Emails
+            </Label>
+            <Stack space="space.100">
+              {emailRows.map((row) => (
+                <Inline key={row.id} space="space.100" alignBlock="center">
+                  <Textfield
+                    value={row.value}
+                    isDisabled={busy}
+                    placeholder="person@example.com"
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setEmailRows((rows) =>
+                        rows.map((r) =>
+                          r.id === row.id ? { ...r, value } : r,
+                        ),
+                      );
+                    }}
+                  />
+                  <Button
+                    appearance="subtle"
+                    isDisabled={busy}
+                    onClick={() => {
+                      setEmailRows((rows) =>
+                        rows.filter((r) => r.id !== row.id),
+                      );
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Inline>
+              ))}
+              <Box>
                 <Button
-                  appearance="subtle"
+                  appearance="default"
                   isDisabled={busy}
                   onClick={() => {
-                    setEmailRows((rows) => rows.filter((r) => r.id !== row.id));
+                    setEmailRows((rows) => [
+                      ...rows,
+                      { id: makeRowId(), value: "" },
+                    ]);
                   }}
                 >
-                  Remove
+                  Add Authorized Initiator Email
                 </Button>
-              </Inline>
-            ))}
-            <Box>
-              <Button
-                appearance="default"
-                isDisabled={busy}
-                onClick={() => {
-                  setEmailRows((rows) => [
-                    ...rows,
-                    { id: makeRowId(), value: "" },
-                  ]);
-                }}
-              >
-                Add Authorized Initiator Email
-              </Button>
-            </Box>
-          </Stack>
-          <HelperMessage>
-            Human users allowed to run Access Restoration from Jira Automation.
-          </HelperMessage>
+              </Box>
+            </Stack>
+            <HelperMessage>
+              Human users allowed to run Access Restoration from Jira
+              Automation.
+            </HelperMessage>
+          </Box>
 
-          <Label labelFor="allowed-groups">Allowed Groups</Label>
-          <Stack space="space.100">
-            {groupRows.map((row) => (
-              <Inline key={row.id} space="space.100" alignBlock="center">
-                <Textfield
-                  value={row.name}
-                  isDisabled={busy}
-                  placeholder="Directory group name"
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setGroupRows((rows) =>
-                      rows.map((r) =>
-                        r.id === row.id ? { ...r, name: value } : r,
-                      ),
-                    );
-                  }}
-                />
+          <Box xcss={fieldGroupStyles}>
+            <Label labelFor="allowed-groups">Allowed Groups</Label>
+            <Stack space="space.100">
+              {groupRows.map((row) => (
+                <Inline key={row.id} space="space.100" alignBlock="center">
+                  <Textfield
+                    value={row.name}
+                    isDisabled={busy}
+                    placeholder="Directory group name"
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setGroupRows((rows) =>
+                        rows.map((r) =>
+                          r.id === row.id ? { ...r, name: value } : r,
+                        ),
+                      );
+                    }}
+                  />
+                  <Button
+                    appearance="subtle"
+                    isDisabled={busy}
+                    onClick={() => {
+                      setGroupRows((rows) =>
+                        rows.filter((r) => r.id !== row.id),
+                      );
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Inline>
+              ))}
+              <Box>
                 <Button
-                  appearance="subtle"
+                  appearance="default"
                   isDisabled={busy}
                   onClick={() => {
-                    setGroupRows((rows) => rows.filter((r) => r.id !== row.id));
+                    setGroupRows((rows) => [
+                      ...rows,
+                      { id: makeRowId(), name: "" },
+                    ]);
                   }}
                 >
-                  Remove
+                  Add Allowed Group
                 </Button>
-              </Inline>
-            ))}
-            <Box>
-              <Button
-                appearance="default"
-                isDisabled={busy}
-                onClick={() => {
-                  setGroupRows((rows) => [
-                    ...rows,
-                    { id: makeRowId(), name: "" },
-                  ]);
-                }}
-              >
-                Add Allowed Group
-              </Button>
-            </Box>
-          </Stack>
-          <HelperMessage>
-            The exact Atlassian directory group name. Authorized Initiators may
-            grant this group during Access Restoration.
-          </HelperMessage>
+              </Box>
+            </Stack>
+            <HelperMessage>
+              The exact Atlassian directory group name. Authorized Initiators
+              may grant this group during Access Restoration.
+            </HelperMessage>
+          </Box>
 
-          <Label labelFor="target-user-timeout-ms">
-            Lookup Budget (optional — defaults apply when left blank)
-          </Label>
-          <Inline space="space.100">
-            <Textfield
-              id="target-user-timeout-ms"
-              value={targetUserTimeoutMs}
-              isDisabled={busy}
-              placeholder="Target User Timeout (ms)"
-              onChange={(event) => {
-                setTargetUserTimeoutMs(event.target.value);
-              }}
-            />
-            <Textfield
-              value={targetUserMaxPages}
-              isDisabled={busy}
-              placeholder="Target User Max Pages"
-              onChange={(event) => {
-                setTargetUserMaxPages(event.target.value);
-              }}
-            />
-            <Textfield
-              value={configResolutionTimeoutMs}
-              isDisabled={busy}
-              placeholder="Config Resolution Timeout (ms)"
-              onChange={(event) => {
-                setConfigResolutionTimeoutMs(event.target.value);
-              }}
-            />
-            <Textfield
-              value={configResolutionMaxPages}
-              isDisabled={busy}
-              placeholder="Config Resolution Max Pages"
-              onChange={(event) => {
-                setConfigResolutionMaxPages(event.target.value);
-              }}
-            />
-          </Inline>
+          <Box>
+            <Label labelFor="target-user-timeout-ms">
+              Lookup Budget (optional — defaults apply when left blank)
+            </Label>
+            <Inline space="space.100">
+              <Textfield
+                id="target-user-timeout-ms"
+                value={targetUserTimeoutMs}
+                isDisabled={busy}
+                placeholder="Target User Timeout (ms)"
+                onChange={(event) => {
+                  setTargetUserTimeoutMs(event.target.value);
+                }}
+              />
+              <Textfield
+                value={targetUserMaxPages}
+                isDisabled={busy}
+                placeholder="Target User Max Pages"
+                onChange={(event) => {
+                  setTargetUserMaxPages(event.target.value);
+                }}
+              />
+              <Textfield
+                value={configResolutionTimeoutMs}
+                isDisabled={busy}
+                placeholder="Config Resolution Timeout (ms)"
+                onChange={(event) => {
+                  setConfigResolutionTimeoutMs(event.target.value);
+                }}
+              />
+              <Textfield
+                value={configResolutionMaxPages}
+                isDisabled={busy}
+                placeholder="Config Resolution Max Pages"
+                onChange={(event) => {
+                  setConfigResolutionMaxPages(event.target.value);
+                }}
+              />
+            </Inline>
+          </Box>
         </FormSection>
         <FormFooter>
           <Inline space="space.100">
