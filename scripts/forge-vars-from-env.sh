@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
-# Sets Forge variables in the configured Forge environment from .env vars.
+# Sets Forge variables from secretspec-declared secrets (dotenv provider).
+set -euo pipefail
 
-# Match lines that don't start with # (comments) and have a key=value pair.
-grep '^[^#]\w*=.*' ./.env | while IFS='=' read -r key value; do
+keys=$(secretspec schema | jq -r '.properties | keys[]')
+
+for key in $keys; do
   case "$key" in
   FORGE*)
-    # Skip vars that configure Forge commands.
-    :
+    # Skip vars that only configure Forge CLI invocations.
+    continue
     ;;
+  esac
+
+  if ! value=$(secretspec get "$key" --provider dotenv --reason "forge-vars-from-env: upload $key" 2>/dev/null); then
+    echo "Skipping $key: not set in the dotenv provider" >&2
+    continue
+  fi
+
+  case "$key" in
   *SECRET* | *TOKEN* | *CREDENTIAL*)
     # Encrypt vars that look like secrets, tokens, or credentials.
     echo npm -s run forge:variables:set-encrypted -- "$key" "****"
-    npm -s run forge:variables:set-encrypted -- "$key" "$value"
+    npm run -s forge:variables:set-encrypted -- "$key" "$value"
     ;;
   *)
     echo npm -s run forge:variables:set -- "$key" "$value"

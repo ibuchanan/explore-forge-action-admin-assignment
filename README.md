@@ -26,6 +26,8 @@ if you have questions or feedback.
 - [Atlassian Forge CLI][forge-getting-started], authenticated with an
   Atlassian account. The `forge:*` scripts assume `forge` is available on
   `PATH`.
+- [secretspec][secretspec], for managing local secrets. The `forge:*` scripts
+  assume `secretspec` is available on `PATH`.
 - An Atlassian Cloud Organization
   that is the target for admin operations.
 - A Jira Cloud site where the Forge app can be registered, deployed, and installed.
@@ -33,6 +35,7 @@ if you have questions or feedback.
 [node-download]: https://nodejs.org/en/download
 [npm-install]: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 [forge-getting-started]: https://developer.atlassian.com/platform/forge/getting-started/
+[secretspec]: https://secretspec.dev/
 
 ## Getting Started
 
@@ -42,15 +45,20 @@ Clone the repository:
 git clone https://github.com/ibuchanan/explore-forge-action-admin-assignment.git
 ```
 
-Copy `.env.example` to `.env`.
-Fill in your `FORGE_ENVIRONMENT`, `FORGE_SITE`, and `FORGE_PRODUCT`.
-Even though the app operates on Org-level APIs,
-the app itself must be installed into a specific Jira site.
-Fill in `ADMIN_ASSIGNMENT_API_TOKEN`
-with [an org admin API key](https://support.atlassian.com/organization-administration/docs/manage-an-organization-with-the-admin-apis/).
-Fill in `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON`
-with a JSON object describing the org, directory, Authorized Initiator emails, and Allowed Groups.
-See below for elaboration on that structure.
+This repo declares its local secrets in [`secretspec.toml`](secretspec.toml)
+and stores real values in a local, gitignored `.env` file through
+secretspec's `dotenv` provider — nothing sensitive is ever committed.
+
+Run `secretspec check --provider dotenv` and follow the prompts to fill in:
+
+- `FORGE_ENVIRONMENT`, `FORGE_SITE`, and `FORGE_PRODUCT`.
+  Even though the app operates on Org-level APIs,
+  the app itself must be installed into a specific Jira site.
+- `ADMIN_ASSIGNMENT_API_TOKEN`,
+  [an org admin API key](https://support.atlassian.com/organization-administration/docs/manage-an-organization-with-the-admin-apis/).
+- `ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON` (optional),
+  a JSON object describing the org, directory, Authorized Initiator emails, and Allowed Groups.
+  See below for elaboration on that structure.
 
 Then run:
 
