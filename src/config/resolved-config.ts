@@ -7,6 +7,7 @@ import type { SourceConfig } from "./source-config";
 export interface ConfigHealth {
   active: boolean;
   messages: string[];
+  validatedAt: string;
 }
 
 export interface ResolvedAllowedGroup {
@@ -106,6 +107,7 @@ export async function resolveConfig(
     configHealth: {
       active: messages.length === 0,
       messages,
+      validatedAt: new Date().toISOString(),
     },
   };
 }

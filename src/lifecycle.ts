@@ -10,7 +10,11 @@ function inactiveConfigHealth(messages: string[]): ResolvedConfig {
     sourceConfigFingerprint: "",
     authorizedInitiatorAccountIds: [],
     allowedGroups: [],
-    configHealth: { active: false, messages },
+    configHealth: {
+      active: false,
+      messages,
+      validatedAt: new Date().toISOString(),
+    },
   };
 }
 

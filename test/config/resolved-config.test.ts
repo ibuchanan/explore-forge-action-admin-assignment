@@ -71,6 +71,7 @@ describe("resolveConfig", () => {
         modifiable: true,
       },
     ]);
+    expect(resolved.configHealth.validatedAt).toEqual(expect.any(String));
   });
 
   it("produces an inactive Config Health with non-secret messages when an initiator email does not resolve", async () => {
@@ -98,5 +99,6 @@ describe("resolveConfig", () => {
         message.includes("token"),
       ),
     ).toBe(false);
+    expect(resolved.configHealth.validatedAt).toEqual(expect.any(String));
   });
 });
