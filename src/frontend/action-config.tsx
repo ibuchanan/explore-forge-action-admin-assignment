@@ -1,10 +1,11 @@
-import { events, view } from "@forge/bridge";
+import { events, invoke, view } from "@forge/bridge";
 import ForgeReconciler, {
   Box,
   ErrorMessage,
   Form,
   HelperMessage,
   Label,
+  Lozenge,
   RequiredAsterisk,
   Stack,
   Text,
@@ -13,6 +14,30 @@ import ForgeReconciler, {
   useProductContext,
 } from "@forge/react";
 import React, { useEffect, useState } from "react";
+
+interface StatusResponse {
+  active: boolean;
+}
+
+function ConfigHealthIndicator() {
+  const [active, setActive] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    invoke<StatusResponse>("getStatus").then((result) => {
+      setActive((result as StatusResponse).active);
+    });
+  }, []);
+
+  if (active === null) {
+    return null;
+  }
+
+  return (
+    <Lozenge appearance={active ? "success" : "removed"}>
+      {active ? "Config: Active" : "Config: Inactive"}
+    </Lozenge>
+  );
+}
 
 interface TargetField {
   name: string;
@@ -160,11 +185,14 @@ function AutomationConfig({ targetField }: { targetField: TargetField }) {
   const savedInputs = (context.extension?.data?.inputs ?? {}) as FormValues;
 
   return (
-    <AutomationInputsForm
-      targetField={targetField}
-      savedInputs={savedInputs}
-      isValidating={isValidating}
-    />
+    <Stack space="space.150">
+      <ConfigHealthIndicator />
+      <AutomationInputsForm
+        targetField={targetField}
+        savedInputs={savedInputs}
+        isValidating={isValidating}
+      />
+    </Stack>
   );
 }
 

@@ -13,6 +13,8 @@ modules:
       config:
         resource: single-config
         render: native
+      resolver:
+        function: actionStatusResolver
       inputs:
         initiatorAccountId:
           title: Initiator account ID
@@ -40,6 +42,8 @@ modules:
       config:
         resource: batch-config
         render: native
+      resolver:
+        function: actionStatusResolver
       inputs:
         initiatorAccountId:
           title: Initiator account ID
@@ -95,6 +99,8 @@ modules:
       handler: index.runLifecycleValidation
     - key: adminResolver
       handler: resolvers/index.handler
+    - key: actionStatusResolver
+      handler: resolvers/action-index.handler
 app:
   runtime:
     name: nodejs24.x
