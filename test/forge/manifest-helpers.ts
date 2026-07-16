@@ -66,6 +66,13 @@ export interface JiraWorkflowAutomationModule {
   description: string;
 }
 
+export interface JiraAdminPageModule {
+  key: string;
+  resolver?: {
+    function: string;
+  };
+}
+
 export interface ParsedManifest {
   modules: {
     function?: ManifestFunction[];
@@ -77,6 +84,7 @@ export interface ParsedManifest {
     "jira:workflowValidator"?: JiraWorkflowAutomationModule[];
     "jira:workflowCondition"?: JiraWorkflowAutomationModule[];
     "jira:workflowPostFunction"?: JiraWorkflowAutomationModule[];
+    "jira:adminPage"?: JiraAdminPageModule[];
     "jiraServiceManagement:assetsImportType"?: AssetsImportTypeModule[];
   };
 }
@@ -186,6 +194,16 @@ export function getManifestHandlerReferences(
       key: postFunction.key,
       handler: resolveFunctionHandler(postFunction.function),
     });
+  }
+
+  for (const page of manifest.modules["jira:adminPage"] || []) {
+    if (page.resolver) {
+      refs.push({
+        moduleType: "jira:adminPage",
+        key: page.key,
+        handler: resolveFunctionHandler(page.resolver.function),
+      });
+    }
   }
 
   for (const module of manifest.modules[

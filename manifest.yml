@@ -69,6 +69,20 @@ modules:
       events:
         - avi:forge:installed:app
         - avi:forge:upgraded:app
+  jira:adminPage:
+    - key: admin-assignment-configure-page
+      title: Configure
+      render: native
+      resource: admin-configure
+      resolver:
+        function: adminResolver
+      useAsConfig: true
+    - key: admin-assignment-status-page
+      title: Admin status
+      render: native
+      resource: admin-status
+      resolver:
+        function: adminResolver
   function:
     - key: restoreAccess
       handler: index.restoreAccess
@@ -79,6 +93,8 @@ modules:
       timeoutSeconds: 900
     - key: runLifecycleValidation
       handler: index.runLifecycleValidation
+    - key: adminResolver
+      handler: resolvers/index.handler
 app:
   runtime:
     name: nodejs24.x
@@ -90,6 +106,10 @@ resources:
     path: src/frontend/single-action-config.tsx
   - key: batch-config
     path: src/frontend/batch-action-config.tsx
+  - key: admin-configure
+    path: src/frontend/admin-configure.tsx
+  - key: admin-status
+    path: src/frontend/admin-status.tsx
 permissions:
   scopes:
     - storage:app
