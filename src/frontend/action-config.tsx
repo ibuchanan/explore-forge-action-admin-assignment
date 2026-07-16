@@ -1,4 +1,4 @@
-import { events, invoke, router, view } from "@forge/bridge";
+import { events, invoke, view } from "@forge/bridge";
 import ForgeReconciler, {
   Box,
   ErrorMessage,
@@ -6,7 +6,7 @@ import ForgeReconciler, {
   HelperMessage,
   Inline,
   Label,
-  LinkButton,
+  Link,
   Lozenge,
   RequiredAsterisk,
   Stack,
@@ -21,7 +21,13 @@ interface StatusResponse {
   active: boolean;
 }
 
+// The UUID from this app's manifest.yml `app.id`
+// (ari:cloud:ecosystem::app/<uuid>) -- a fixed identity, unlike the
+// per-environment envId below.
+const APP_ID = "7b5d7c1c-387c-40d8-a530-e16614d64b5b";
+
 function ConfigHealthIndicator() {
+  const context = useProductContext();
   const [active, setActive] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -30,38 +36,42 @@ function ConfigHealthIndicator() {
     });
   }, []);
 
-  if (active === null) {
-    return null;
-  }
-
   // Box/xcss background-color overrides don't render inside this action
   // config surface (confirmed empirically: a filled Box + inverse Text
   // rendered as plain unstyled black text). Lozenge's color comes from the
   // platform's built-in appearance system rather than a custom xcss
   // override, so it renders correctly here. Inline keeps it content-width
   // instead of stretching to the Stack's full width.
+  //
+  // The Configure link below is experimental: this URL pattern
+  // (siteUrl/jira/settings/apps/configure/{appId}/{envId}) comes from a
+  // Jira issue tracker report, not official docs. router.navigate +
+  // LinkButton was the confirmed-working fallback before this; revert to
+  // that pairing if this 404s or misroutes.
+  const configureUrl = context
+    ? `${context.siteUrl}/jira/settings/apps/configure/${APP_ID}/${context.environmentId}`
+    : undefined;
+
+  const lozengeAppearance =
+    active === null ? "default" : active ? "success" : "removed";
+  const lozengeLabel =
+    active === null
+      ? "Config: Unknown"
+      : active
+        ? "Config: Active"
+        : "Config: Inactive";
+
   return (
     <Stack space="space.050">
       <Inline>
-        <Lozenge appearance={active ? "success" : "removed"}>
-          {active ? "Config: Active" : "Config: Inactive"}
-        </Lozenge>
+        <Lozenge appearance={lozengeAppearance}>{lozengeLabel}</Lozenge>
       </Inline>
-      {!active && (
+      {active === false && configureUrl && (
         <Inline space="space.050" alignBlock="center">
           <Text>Admins need to</Text>
-          <LinkButton
-            appearance="link"
-            onClick={() => {
-              void router.navigate({
-                target: "module",
-                moduleKey: "admin-assignment-configure-page",
-              });
-            }}
-          >
+          <Link href={configureUrl} openNewTab>
             configure
-          </LinkButton>
-          <Text>.</Text>
+          </Link>
         </Inline>
       )}
     </Stack>
