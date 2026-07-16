@@ -1,4 +1,4 @@
-import { invoke } from "@forge/bridge";
+import { invoke, router } from "@forge/bridge";
 import ForgeReconciler, {
   Box,
   Button,
@@ -51,8 +51,8 @@ const App = () => {
           title="Source Config is not configured"
         >
           <Text>
-            Use the Configure page for this app in Manage Apps to set Org ID,
-            Directory ID, Authorized Initiator Emails, and Allowed Groups.
+            Use the Configure button below to set Org ID, Directory ID,
+            Authorized Initiator Emails, and Allowed Groups.
           </Text>
         </SectionMessage>
       )}
@@ -67,8 +67,7 @@ const App = () => {
         <SectionMessage appearance="error" title="Config Health: inactive">
           <Text>
             Access Restoration will fail closed until this is resolved. Use the
-            Configure page for this app in Manage Apps to review and re-save
-            Source Config.
+            Configure button below to review and re-save Source Config.
           </Text>
           {status.messages.map((message) => (
             <Text key={message}>{message}</Text>
@@ -93,6 +92,18 @@ const App = () => {
       <Inline space="space.100">
         <Button
           appearance="primary"
+          onClick={() => {
+            // @see https://developer.atlassian.com/platform/forge/apis-reference/ui-api-bridge/router/#example-7
+            void router.navigate({
+              target: "module",
+              moduleKey: "admin-assignment-configure-page",
+            });
+          }}
+        >
+          Configure
+        </Button>
+        <Button
+          appearance="subtle"
           isDisabled={refreshing}
           onClick={handleRefresh}
         >
