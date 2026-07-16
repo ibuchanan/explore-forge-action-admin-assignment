@@ -4,20 +4,36 @@ import ForgeReconciler, {
   ErrorMessage,
   Form,
   HelperMessage,
+  Inline,
   Label,
-  Lozenge,
   RequiredAsterisk,
   Stack,
   Text,
   Textfield,
   useForm,
   useProductContext,
+  xcss,
 } from "@forge/react";
 import React, { useEffect, useState } from "react";
 
 interface StatusResponse {
   active: boolean;
 }
+
+const configHealthBadgeStyles = xcss({
+  display: "inline-block",
+  borderRadius: "radius.small",
+  paddingInline: "space.100",
+  paddingBlock: "space.025",
+});
+
+const activeBadgeStyles = xcss({
+  backgroundColor: "color.background.success.bold",
+});
+
+const inactiveBadgeStyles = xcss({
+  backgroundColor: "color.background.danger.bold",
+});
 
 function ConfigHealthIndicator() {
   const [active, setActive] = useState<boolean | null>(null);
@@ -33,9 +49,18 @@ function ConfigHealthIndicator() {
   }
 
   return (
-    <Lozenge appearance={active ? "success" : "removed"}>
-      {active ? "Config: Active" : "Config: Inactive"}
-    </Lozenge>
+    <Inline>
+      <Box
+        xcss={[
+          configHealthBadgeStyles,
+          active ? activeBadgeStyles : inactiveBadgeStyles,
+        ]}
+      >
+        <Text color="color.text.inverse" weight="bold">
+          {active ? "Config: Active" : "Config: Inactive"}
+        </Text>
+      </Box>
+    </Inline>
   );
 }
 
