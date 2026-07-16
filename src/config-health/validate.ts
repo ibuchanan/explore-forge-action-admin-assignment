@@ -14,7 +14,7 @@ function problem(status: number, detail: string): ProblemDetails {
   return StandardError.getOrDefault(status).error(detail)._unsafeUnwrapErr();
 }
 
-function buildInactiveResolvedConfig(
+export function buildInactiveResolvedConfig(
   messages: string[],
   fingerprint = "",
 ): ResolvedConfig {

@@ -1,22 +1,16 @@
 import { toErrorMessage } from "@forge-ahead/errors";
 import type { ResolvedConfig } from "./config/resolved-config";
-import { resolveConfig } from "./config/resolved-config";
 import { parseSourceConfig } from "./config/source-config";
+import {
+  getSourceConfigRecord,
+  storeSourceConfigRecord,
+} from "./config/source-config-store";
+import {
+  buildInactiveResolvedConfig,
+  runSourceConfigValidation,
+} from "./config-health/validate";
 import { storeResolvedConfig } from "./config-health/store";
 import { logger } from "./logging";
-
-function inactiveConfigHealth(messages: string[]): ResolvedConfig {
-  return {
-    sourceConfigFingerprint: "",
-    authorizedInitiatorAccountIds: [],
-    allowedGroups: [],
-    configHealth: {
-      active: false,
-      messages,
-      validatedAt: new Date().toISOString(),
-    },
-  };
-}
 
 function logConfigHealth(configHealth: ResolvedConfig["configHealth"]): void {
   const level = configHealth.active ? "info" : "warn";
@@ -26,44 +20,34 @@ function logConfigHealth(configHealth: ResolvedConfig["configHealth"]): void {
   );
 }
 
+async function seedSourceConfigFromLegacyEnvVarIfUnseeded(): Promise<void> {
+  const existingRecord = await getSourceConfigRecord();
+  if (existingRecord) {
+    return;
+  }
+
+  const rawSourceConfig = process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON;
+  const parsedSourceConfig = rawSourceConfig
+    ? parseSourceConfig(rawSourceConfig)
+    : undefined;
+
+  if (parsedSourceConfig?.isOk()) {
+    await storeSourceConfigRecord({
+      state: "configured",
+      sourceConfig: parsedSourceConfig.value,
+    });
+  } else {
+    await storeSourceConfigRecord({ state: "unconfigured" });
+  }
+}
+
 export async function runLifecycleValidation(): Promise<void> {
   try {
-    const rawSourceConfig = process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON;
-    if (!rawSourceConfig) {
-      const record = inactiveConfigHealth([
-        "ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON is not set",
-      ]);
-      await storeResolvedConfig(record);
-      logConfigHealth(record.configHealth);
-      return;
-    }
-
-    const parsedSourceConfig = parseSourceConfig(rawSourceConfig);
-    if (parsedSourceConfig.isErr()) {
-      const record = inactiveConfigHealth([parsedSourceConfig.error.detail]);
-      await storeResolvedConfig(record);
-      logConfigHealth(record.configHealth);
-      return;
-    }
-
-    const apiToken = process.env.ADMIN_ASSIGNMENT_API_TOKEN;
-    if (!apiToken) {
-      const record = inactiveConfigHealth([
-        "ADMIN_ASSIGNMENT_API_TOKEN is not set",
-      ]);
-      await storeResolvedConfig(record);
-      logConfigHealth(record.configHealth);
-      return;
-    }
-
-    const resolvedConfig = await resolveConfig(
-      apiToken,
-      parsedSourceConfig.value,
-    );
-    await storeResolvedConfig(resolvedConfig);
+    await seedSourceConfigFromLegacyEnvVarIfUnseeded();
+    const resolvedConfig = await runSourceConfigValidation();
     logConfigHealth(resolvedConfig.configHealth);
   } catch (error) {
-    const record = inactiveConfigHealth([toErrorMessage(error)]);
+    const record = buildInactiveResolvedConfig([toErrorMessage(error)]);
     await storeResolvedConfig(record);
     logConfigHealth(record.configHealth);
   }
