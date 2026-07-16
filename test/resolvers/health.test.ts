@@ -23,9 +23,7 @@ const sourceConfig: SourceConfig = {
   orgId: "org-1",
   directoryId: "dir-1",
   authorizedInitiatorEmails: ["alice@example.com"],
-  allowedGroups: [
-    { key: "jira-admins", label: "Jira admins", name: "jira-administrators" },
-  ],
+  allowedGroups: [{ name: "jira-administrators" }],
   lookup: {
     targetUserTimeoutMs: 10_000,
     targetUserMaxPages: 5,
@@ -104,9 +102,7 @@ describe("getStatus", () => {
 
     expect(result.state).toBe("configured");
     expect(result.active).toBe(true);
-    expect(result.allowedGroups).toEqual([
-      { key: "jira-admins", label: "Jira admins" },
-    ]);
+    expect(result.allowedGroups).toEqual([{ name: "jira-administrators" }]);
     expect(result.sourceConfigFingerprint).toBe(fingerprint);
     expect(result.validatedAt).toEqual(expect.any(String));
   });
@@ -164,7 +160,7 @@ describe("getStatus", () => {
       state: "configured",
       active: true,
       messages: [],
-      allowedGroups: [{ key: "jira-admins", label: "Jira admins" }],
+      allowedGroups: [{ name: "jira-administrators" }],
       sourceConfigFingerprint: fingerprint,
       validatedAt: "2026-01-01T00:00:00.000Z",
     });

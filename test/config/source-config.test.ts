@@ -11,13 +11,7 @@ describe("parseSourceConfig", () => {
       orgId: "org-1",
       directoryId: "dir-1",
       authorizedInitiatorEmails: ["alice@example.com"],
-      allowedGroups: [
-        {
-          key: "jira-admins",
-          label: "Jira admins",
-          name: "jira-administrators",
-        },
-      ],
+      allowedGroups: [{ name: "jira-administrators" }],
     });
 
     const result = parseSourceConfig(raw);
@@ -27,13 +21,7 @@ describe("parseSourceConfig", () => {
       orgId: "org-1",
       directoryId: "dir-1",
       authorizedInitiatorEmails: ["alice@example.com"],
-      allowedGroups: [
-        {
-          key: "jira-admins",
-          label: "Jira admins",
-          name: "jira-administrators",
-        },
-      ],
+      allowedGroups: [{ name: "jira-administrators" }],
       lookup: DEFAULT_LOOKUP_BUDGET,
     });
   });
@@ -42,13 +30,7 @@ describe("parseSourceConfig", () => {
     const raw = JSON.stringify({
       directoryId: "dir-1",
       authorizedInitiatorEmails: ["alice@example.com"],
-      allowedGroups: [
-        {
-          key: "jira-admins",
-          label: "Jira admins",
-          name: "jira-administrators",
-        },
-      ],
+      allowedGroups: [{ name: "jira-administrators" }],
     });
 
     const result = parseSourceConfig(raw);
@@ -89,13 +71,7 @@ describe("validateSourceConfig", () => {
       orgId: "org-1",
       directoryId: "dir-1",
       authorizedInitiatorEmails: ["alice@example.com"],
-      allowedGroups: [
-        {
-          key: "jira-admins",
-          label: "Jira admins",
-          name: "jira-administrators",
-        },
-      ],
+      allowedGroups: [{ name: "jira-administrators" }],
     };
 
     const result = validateSourceConfig(candidate);

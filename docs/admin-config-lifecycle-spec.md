@@ -57,7 +57,7 @@ A Jira App Administrator can view, edit, and validate Source Config from a Jira 
   - `orgId`
   - `directoryId`
   - repeatable Authorized Initiator Email rows
-  - repeatable Allowed Group rows with `key`, `label`, and `name`
+  - repeatable Allowed Group rows, each a single directory group `name` (Group Key and label are derived from `name`, not admin-typed)
   - numeric Lookup Budget fields
 - The resolver assembles the same `SourceConfig` object from structured form payloads and uses a shared `validateSourceConfig(candidate: unknown)` helper as the backend schema gate.
 - A raw JSON preview/import affordance can be added later, but raw JSON is not the primary editing surface.

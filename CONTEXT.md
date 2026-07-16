@@ -93,8 +93,8 @@ An Allowed Group chosen for a specific Interactive Initiation.
 _Avoid_: configured group, all groups
 
 **Group Key**:
-A stable configured alias used in Runtime Input to identify an Allowed Group.
-_Avoid_: group ID, group name
+A stable alias, derived from an Allowed Group's Allowed Group Name, used in Runtime Input to identify the Allowed Group.
+_Avoid_: group ID, group name (still a distinct concept from Allowed Group Name, even though its value is now always identical)
 
 **Access Restoration**:
 The complete operation of restoring a Target User's directory access and adding them to the Selected Groups.

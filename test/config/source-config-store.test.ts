@@ -21,9 +21,7 @@ const sourceConfig: SourceConfig = {
   orgId: "org-1",
   directoryId: "dir-1",
   authorizedInitiatorEmails: ["alice@example.com"],
-  allowedGroups: [
-    { key: "jira-admins", label: "Jira admins", name: "jira-administrators" },
-  ],
+  allowedGroups: [{ name: "jira-administrators" }],
   lookup: {
     targetUserTimeoutMs: 10_000,
     targetUserMaxPages: 5,

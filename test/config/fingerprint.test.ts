@@ -6,9 +6,7 @@ const baseConfig: SourceConfig = {
   orgId: "org-1",
   directoryId: "dir-1",
   authorizedInitiatorEmails: ["alice@example.com"],
-  allowedGroups: [
-    { key: "jira-admins", label: "Jira admins", name: "jira-administrators" },
-  ],
+  allowedGroups: [{ name: "jira-administrators" }],
   lookup: {
     targetUserTimeoutMs: 10_000,
     targetUserMaxPages: 5,
@@ -23,8 +21,6 @@ describe("computeSourceConfigFingerprint", () => {
       lookup: { ...baseConfig.lookup },
       allowedGroups: baseConfig.allowedGroups.map((group) => ({
         name: group.name,
-        key: group.key,
-        label: group.label,
       })),
       authorizedInitiatorEmails: [...baseConfig.authorizedInitiatorEmails],
       directoryId: baseConfig.directoryId,

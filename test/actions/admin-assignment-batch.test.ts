@@ -35,9 +35,7 @@ const validSourceConfigJson = JSON.stringify({
   orgId: "org-1",
   directoryId: "dir-1",
   authorizedInitiatorEmails: ["alice@example.com"],
-  allowedGroups: [
-    { key: "jira-admins", label: "Jira admins", name: "jira-administrators" },
-  ],
+  allowedGroups: [{ name: "jira-administrators" }],
 });
 
 const sourceConfig = parseSourceConfig(validSourceConfigJson)._unsafeUnwrap();

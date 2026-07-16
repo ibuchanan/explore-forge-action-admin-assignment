@@ -11,7 +11,7 @@ export interface StatusResponse {
   state: "configured" | "unconfigured";
   active: boolean;
   messages: string[];
-  allowedGroups: Array<{ key: string; label: string }>;
+  allowedGroups: Array<{ name: string }>;
   sourceConfigFingerprint: string;
   validatedAt: string;
 }
@@ -40,8 +40,7 @@ export async function getStatus(): Promise<StatusResponse> {
     active: resolvedConfig.configHealth.active,
     messages: resolvedConfig.configHealth.messages,
     allowedGroups: resolvedConfig.allowedGroups.map((group) => ({
-      key: group.key,
-      label: group.label,
+      name: group.name,
     })),
     sourceConfigFingerprint: resolvedConfig.sourceConfigFingerprint,
     validatedAt: resolvedConfig.configHealth.validatedAt,

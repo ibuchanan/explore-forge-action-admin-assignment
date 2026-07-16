@@ -75,16 +75,8 @@ Source Config is admin-editable app configuration, not Environment Configuration
   "directoryId": "directory-id",
   "authorizedInitiatorEmails": ["alice@example.com", "bob@example.com"],
   "allowedGroups": [
-    {
-      "key": "jira-admins",
-      "label": "Jira admins",
-      "name": "jira-administrators"
-    },
-    {
-      "key": "support-admins",
-      "label": "Support admins",
-      "name": "support-administrators"
-    }
+    { "name": "jira-administrators" },
+    { "name": "support-administrators" }
   ],
   "lookup": {
     "targetUserTimeoutMs": 10000,
@@ -101,9 +93,8 @@ Schema rules:
 - `directoryId` is required.
 - `authorizedInitiatorEmails` is a non-empty JSON array of email strings.
 - `allowedGroups` is a non-empty JSON array.
-- `allowedGroups[*].key` is the stable Runtime Input token for a group.
-- `allowedGroups[*].label` is a human-readable label for logs and summaries.
 - `allowedGroups[*].name` is the exact Atlassian group name to resolve.
+- Resolution derives the Group Key and label from `allowedGroups[*].name`; an admin does not type them separately.
 - The app does not enforce a hardcoded maximum number of allowed groups.
 - Lookup budget fields are optional and have conservative defaults.
 
@@ -118,8 +109,8 @@ Resolved Config contains:
 - Source Config fingerprint.
 - Resolved Authorized Initiator account IDs.
 - Resolved Allowed Groups, each mapping:
-  - Group Key
-  - label
+  - Group Key (derived from, and identical to, the Allowed Group Name)
+  - label (derived from, and identical to, the Allowed Group Name)
   - Allowed Group Name
   - Directory Group ID
 - Config Health status and non-secret validation messages.

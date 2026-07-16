@@ -24,9 +24,7 @@ const validSourceConfigJson = JSON.stringify({
   orgId: "org-1",
   directoryId: "dir-1",
   authorizedInitiatorEmails: ["alice@example.com"],
-  allowedGroups: [
-    { key: "jira-admins", label: "Jira admins", name: "jira-administrators" },
-  ],
+  allowedGroups: [{ name: "jira-administrators" }],
 });
 
 const sourceConfig = parseSourceConfig(validSourceConfigJson)._unsafeUnwrap();
@@ -238,7 +236,7 @@ describe("restoreAccess", () => {
     const result = await restoreAccess({
       initiatorAccountId: "initiator-1",
       targetUserEmail: "person@example.com",
-      selectedGroupKeys: "jira-admins",
+      selectedGroupKeys: "jira-administrators",
     });
 
     expect(result.status).toBe("succeeded");

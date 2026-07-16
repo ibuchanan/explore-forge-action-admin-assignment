@@ -92,8 +92,8 @@ export async function resolveConfig(
     }
 
     allowedGroups.push({
-      key: group.key,
-      label: group.label,
+      key: group.name,
+      label: group.name,
       name: group.name,
       directoryGroupId: result.value.id,
       modifiable: result.value.modifiable,

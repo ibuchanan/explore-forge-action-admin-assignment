@@ -20,9 +20,7 @@ const validSourceConfigJson = JSON.stringify({
   orgId: "org-1",
   directoryId: "dir-1",
   authorizedInitiatorEmails: ["alice@example.com"],
-  allowedGroups: [
-    { key: "jira-admins", label: "Jira admins", name: "jira-administrators" },
-  ],
+  allowedGroups: [{ name: "jira-administrators" }],
 });
 
 function seedExistingRecord(initialRecord: SourceConfigRecord | undefined) {
@@ -134,9 +132,7 @@ describe("runLifecycleValidation", () => {
         orgId: "existing-org",
         directoryId: "existing-dir",
         authorizedInitiatorEmails: ["bob@example.com"],
-        allowedGroups: [
-          { key: "existing", label: "Existing", name: "existing-group" },
-        ],
+        allowedGroups: [{ name: "existing-group" }],
         lookup: {
           targetUserTimeoutMs: 10_000,
           targetUserMaxPages: 5,

@@ -10,8 +10,6 @@ export interface LookupBudget {
 }
 
 export interface AllowedGroupConfig {
-  key: string;
-  label: string;
   name: string;
 }
 
@@ -31,8 +29,6 @@ export const DEFAULT_LOOKUP_BUDGET: LookupBudget = {
 };
 
 const allowedGroupSchema = z.object({
-  key: z.string().min(1),
-  label: z.string().min(1),
   name: z.string().min(1),
 });
 

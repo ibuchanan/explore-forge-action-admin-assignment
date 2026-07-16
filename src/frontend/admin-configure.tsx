@@ -19,8 +19,6 @@ import ForgeReconciler, {
 import React, { useEffect, useState } from "react";
 
 interface AllowedGroup {
-  key: string;
-  label: string;
   name: string;
 }
 
@@ -81,7 +79,7 @@ const App = () => {
     { id: makeRowId(), value: "" },
   ]);
   const [groupRows, setGroupRows] = useState<GroupRow[]>([
-    { id: makeRowId(), key: "", label: "", name: "" },
+    { id: makeRowId(), name: "" },
   ]);
   const [targetUserTimeoutMs, setTargetUserTimeoutMs] = useState("");
   const [targetUserMaxPages, setTargetUserMaxPages] = useState("");
@@ -110,7 +108,7 @@ const App = () => {
         const groups =
           sourceConfig.allowedGroups.length > 0
             ? sourceConfig.allowedGroups
-            : [{ key: "", label: "", name: "" }];
+            : [{ name: "" }];
         setGroupRows(groups.map((group) => ({ id: makeRowId(), ...group })));
         setTargetUserTimeoutMs(String(sourceConfig.lookup.targetUserTimeoutMs));
         setTargetUserMaxPages(String(sourceConfig.lookup.targetUserMaxPages));
@@ -137,12 +135,8 @@ const App = () => {
         .map((row) => row.value.trim())
         .filter((email) => email.length > 0),
       allowedGroups: groupRows
-        .map((row) => ({
-          key: row.key.trim(),
-          label: row.label.trim(),
-          name: row.name.trim(),
-        }))
-        .filter((group) => group.key && group.label && group.name),
+        .map((row) => ({ name: row.name.trim() }))
+        .filter((group) => group.name.length > 0),
       lookup: {
         targetUserTimeoutMs: toNumberOrUndefined(targetUserTimeoutMs),
         targetUserMaxPages: toNumberOrUndefined(targetUserMaxPages),
@@ -172,7 +166,7 @@ const App = () => {
       setOrgId("");
       setDirectoryId("");
       setEmailRows([{ id: makeRowId(), value: "" }]);
-      setGroupRows([{ id: makeRowId(), key: "", label: "", name: "" }]);
+      setGroupRows([{ id: makeRowId(), name: "" }]);
       setTargetUserTimeoutMs("");
       setTargetUserMaxPages("");
       setConfigResolutionTimeoutMs("");
@@ -320,32 +314,6 @@ const App = () => {
             {groupRows.map((row) => (
               <Inline key={row.id} space="space.100" alignBlock="center">
                 <Textfield
-                  value={row.key}
-                  isDisabled={busy}
-                  placeholder="Group Key"
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setGroupRows((rows) =>
-                      rows.map((r) =>
-                        r.id === row.id ? { ...r, key: value } : r,
-                      ),
-                    );
-                  }}
-                />
-                <Textfield
-                  value={row.label}
-                  isDisabled={busy}
-                  placeholder="Label"
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setGroupRows((rows) =>
-                      rows.map((r) =>
-                        r.id === row.id ? { ...r, label: value } : r,
-                      ),
-                    );
-                  }}
-                />
-                <Textfield
                   value={row.name}
                   isDisabled={busy}
                   placeholder="Directory group name"
@@ -376,7 +344,7 @@ const App = () => {
                 onClick={() => {
                   setGroupRows((rows) => [
                     ...rows,
-                    { id: makeRowId(), key: "", label: "", name: "" },
+                    { id: makeRowId(), name: "" },
                   ]);
                 }}
               >
@@ -385,8 +353,8 @@ const App = () => {
             </Box>
           </Stack>
           <HelperMessage>
-            Directory groups Authorized Initiators may grant during Access
-            Restoration.
+            The exact Atlassian directory group name. Authorized Initiators may
+            grant this group during Access Restoration.
           </HelperMessage>
 
           <Label labelFor="target-user-timeout-ms">

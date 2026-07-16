@@ -14,7 +14,7 @@ interface StatusResponse {
   state: "configured" | "unconfigured";
   active: boolean;
   messages: string[];
-  allowedGroups: Array<{ key: string; label: string }>;
+  allowedGroups: Array<{ name: string }>;
   sourceConfigFingerprint: string;
   validatedAt: string;
 }
@@ -83,9 +83,7 @@ const App = () => {
         <Box>
           <Text>Resolved Allowed Groups:</Text>
           {status.allowedGroups.map((group) => (
-            <Text key={group.key}>
-              {group.label} ({group.key})
-            </Text>
+            <Text key={group.name}>{group.name}</Text>
           ))}
         </Box>
       )}
