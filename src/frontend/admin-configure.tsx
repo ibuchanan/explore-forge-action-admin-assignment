@@ -9,6 +9,7 @@ import ForgeReconciler, {
   HelperMessage,
   Inline,
   Label,
+  Link,
   RequiredAsterisk,
   SectionMessage,
   Stack,
@@ -239,6 +240,14 @@ const App = () => {
               setOrgId(event.target.value);
             }}
           />
+          <HelperMessage>
+            <Link
+              href="https://confluence.atlassian.com/cloudkb/retrieve-my-atlassian-cloud-organization-s-id-1207189876.html"
+              openNewTab
+            >
+              Where do I find my Org ID?
+            </Link>
+          </HelperMessage>
 
           <Label labelFor="directory-id">
             Directory ID
@@ -252,6 +261,14 @@ const App = () => {
               setDirectoryId(event.target.value);
             }}
           />
+          <HelperMessage>
+            <Link
+              href="https://developer.atlassian.com/cloud/admin/organization/rest/api-group-directory/"
+              openNewTab
+            >
+              Where do I find my Directory ID?
+            </Link>
+          </HelperMessage>
 
           <Label labelFor="initiator-emails">Authorized Initiator Emails</Label>
           <Stack space="space.100">
@@ -281,7 +298,7 @@ const App = () => {
             ))}
             <Box>
               <Button
-                appearance="subtle"
+                appearance="default"
                 isDisabled={busy}
                 onClick={() => {
                   setEmailRows((rows) => [
@@ -354,7 +371,7 @@ const App = () => {
             ))}
             <Box>
               <Button
-                appearance="subtle"
+                appearance="default"
                 isDisabled={busy}
                 onClick={() => {
                   setGroupRows((rows) => [
