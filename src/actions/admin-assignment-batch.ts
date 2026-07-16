@@ -1,13 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { type ProblemDetails, StandardError } from "@forge-ahead/errors";
 import { PartialSuccessError, Queue } from "@forge/events";
-import { resolveConfig, type ResolvedConfig } from "../config/resolved-config";
-import { computeSourceConfigFingerprint } from "../config/fingerprint";
-import { parseSourceConfig } from "../config/source-config";
-import {
-  getStoredResolvedConfig,
-  storeResolvedConfig,
-} from "../config-health/store";
+import { ensureActiveResolvedConfig } from "../config-health/validate";
 import { logger } from "../logging";
 import {
   parseSelectedGroupKeys,
@@ -58,35 +52,6 @@ function fail(step: string, problemDetails: ProblemDetails): never {
   );
 }
 
-async function loadActiveResolvedConfig(
-  apiToken: string,
-  rawSourceConfig: string,
-): Promise<ResolvedConfig> {
-  const sourceConfigResult = parseSourceConfig(rawSourceConfig);
-  if (sourceConfigResult.isErr()) {
-    fail("load-source-config", sourceConfigResult.error);
-  }
-  const sourceConfig = sourceConfigResult.value;
-  const sourceConfigFingerprint = computeSourceConfigFingerprint(sourceConfig);
-
-  let resolvedConfig = await getStoredResolvedConfig();
-  if (
-    !resolvedConfig?.configHealth.active ||
-    resolvedConfig.sourceConfigFingerprint !== sourceConfigFingerprint
-  ) {
-    resolvedConfig = await resolveConfig(apiToken, sourceConfig);
-    await storeResolvedConfig(resolvedConfig);
-  }
-  if (!resolvedConfig.configHealth.active) {
-    fail(
-      "refresh-resolved-config",
-      problem(500, "Resolved Config is inactive after inline refresh"),
-    );
-  }
-
-  return resolvedConfig;
-}
-
 export async function enqueueAccessRestorationBatch(
   payload: AdminAssignmentBatchActionPayload,
 ): Promise<BatchAcknowledgment> {
@@ -95,19 +60,19 @@ export async function enqueueAccessRestorationBatch(
   }
   const initiatorAccountId = payload.initiatorAccountId;
 
-  const rawSourceConfig = process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON;
   const apiToken = process.env.ADMIN_ASSIGNMENT_API_TOKEN;
-  if (!rawSourceConfig || !apiToken) {
+  if (!apiToken) {
     fail(
       "load-source-config",
       problem(500, "Environment Configuration is missing"),
     );
   }
 
-  const resolvedConfig = await loadActiveResolvedConfig(
-    apiToken,
-    rawSourceConfig,
-  );
+  const runtimeConfigResult = await ensureActiveResolvedConfig();
+  if (runtimeConfigResult.isErr()) {
+    fail("load-source-config", runtimeConfigResult.error);
+  }
+  const { resolvedConfig } = runtimeConfigResult.value;
 
   if (
     !resolvedConfig.authorizedInitiatorAccountIds.includes(initiatorAccountId)

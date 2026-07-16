@@ -1,18 +1,11 @@
 import api from "@forge/api";
 import { kvs } from "@forge/kvs";
-import {
-  type Mock,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiResponse } from "../admin-api/test-helpers";
 import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
 import type { ResolvedConfig } from "../../src/config/resolved-config";
 import { parseSourceConfig } from "../../src/config/source-config";
+import type { SourceConfigRecord } from "../../src/config/source-config-store";
 import { restoreAccess } from "../../src/actions/admin-assignment";
 import { logger } from "../../src/logging";
 
@@ -24,11 +17,8 @@ vi.mock("@forge/kvs", () => ({
   kvs: { get: vi.fn(), set: vi.fn() },
 }));
 
-// kvs.get is overloaded in @forge/kvs's types; narrow it to the single-argument
-// shape this module actually uses so the mock helpers type-check.
-const kvsGetMock = kvs.get as unknown as Mock<
-  (key: string) => Promise<ResolvedConfig | undefined>
->;
+const SOURCE_CONFIG_KEY = "admin-assignment.source-config";
+const RESOLVED_CONFIG_KEY = "admin-assignment.resolved-config";
 
 const validSourceConfigJson = JSON.stringify({
   orgId: "org-1",
@@ -39,9 +29,9 @@ const validSourceConfigJson = JSON.stringify({
   ],
 });
 
-const sourceConfigFingerprint = computeSourceConfigFingerprint(
-  parseSourceConfig(validSourceConfigJson)._unsafeUnwrap(),
-);
+const sourceConfig = parseSourceConfig(validSourceConfigJson)._unsafeUnwrap();
+
+const sourceConfigFingerprint = computeSourceConfigFingerprint(sourceConfig);
 
 const jiraAdminsGroup = {
   key: "jira-admins",
@@ -55,11 +45,28 @@ const activeResolvedConfig: ResolvedConfig = {
   sourceConfigFingerprint,
   authorizedInitiatorAccountIds: ["initiator-1"],
   allowedGroups: [jiraAdminsGroup],
-  configHealth: { active: true, messages: [] },
+  configHealth: {
+    active: true,
+    messages: [],
+    validatedAt: "2026-01-01T00:00:00.000Z",
+  },
 };
 
+// Seeds both KVS keys read by ensureActiveResolvedConfig(): the configured
+// Source Config record, and whatever Resolved Config (if any) is already stored.
+function seedKvs(resolvedConfig?: ResolvedConfig) {
+  const sourceConfigRecord: SourceConfigRecord = {
+    state: "configured",
+    sourceConfig,
+  };
+  vi.mocked(kvs.get).mockImplementation(async (key: string) => {
+    if (key === SOURCE_CONFIG_KEY) return sourceConfigRecord;
+    if (key === RESOLVED_CONFIG_KEY) return resolvedConfig;
+    return undefined;
+  });
+}
+
 function setValidEnv() {
-  process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = validSourceConfigJson;
   process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
 }
 
@@ -68,7 +75,7 @@ describe("restoreAccess", () => {
 
   beforeEach(() => {
     vi.mocked(api.fetch).mockReset();
-    kvsGetMock.mockReset();
+    vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = undefined;
     process.env.ADMIN_ASSIGNMENT_API_TOKEN = undefined;
@@ -91,7 +98,7 @@ describe("restoreAccess", () => {
 
   it("restores access and adds the Target User to every Selected Group, returning a Success Summary", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     vi.mocked(api.fetch)
       .mockResolvedValueOnce(
         mockApiResponse(200, {
@@ -122,6 +129,9 @@ describe("restoreAccess", () => {
     });
 
     const calls = vi.mocked(api.fetch).mock.calls;
+    expect(calls[0]?.[0]).toBe(
+      "https://api.atlassian.com/admin/v2/orgs/org-1/directories/dir-1/users/search",
+    );
     expect(calls[1]?.[0]).toBe(
       "https://api.atlassian.com/admin/v2/orgs/org-1/directories/dir-1/users/target-1/restore",
     );
@@ -132,7 +142,7 @@ describe("restoreAccess", () => {
 
   it("skips the restore and membership writes when the Target User already has both, and still succeeds", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(
       mockApiResponse(200, {
         data: [
@@ -160,7 +170,7 @@ describe("restoreAccess", () => {
 
   it("fails closed when initiatorAccountId is not an Authorized Initiator", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
 
     await expect(
       restoreAccess({
@@ -175,7 +185,7 @@ describe("restoreAccess", () => {
 
   it("fails closed when selectedGroupKeys includes an unknown Group Key", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
 
     await expect(
       restoreAccess({
@@ -190,7 +200,7 @@ describe("restoreAccess", () => {
 
   it("refreshes an inline Resolved Config when the stored fingerprint is stale, then proceeds", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce({
+    seedKvs({
       ...activeResolvedConfig,
       sourceConfigFingerprint: "stale-fingerprint",
     });
@@ -237,7 +247,7 @@ describe("restoreAccess", () => {
 
   it("fails closed before restoring access when a Selected Group cannot accept direct membership changes", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce({
+    seedKvs({
       ...activeResolvedConfig,
       allowedGroups: [{ ...jiraAdminsGroup, modifiable: false }],
     });
@@ -270,7 +280,7 @@ describe("restoreAccess", () => {
   it("includes the Batch ID in the Audit Record when the payload carries one", async () => {
     const logSpy = vi.spyOn(logger, "info").mockImplementation(() => undefined);
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(
       mockApiResponse(200, {
         data: [
@@ -309,7 +319,7 @@ describe("restoreAccess", () => {
   it("omits the batchId field entirely from the Audit Record for a single-user run without one", async () => {
     const logSpy = vi.spyOn(logger, "info").mockImplementation(() => undefined);
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(
       mockApiResponse(200, {
         data: [
@@ -349,7 +359,7 @@ describe("restoreAccess", () => {
       .spyOn(logger, "error")
       .mockImplementation(() => undefined);
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     vi.mocked(api.fetch).mockResolvedValueOnce(
       mockApiResponse(200, { data: [], links: {} }),
     );
@@ -365,5 +375,22 @@ describe("restoreAccess", () => {
     const loggedText = JSON.stringify(logSpy.mock.calls);
     expect(loggedText).not.toContain("secret-token");
     logSpy.mockRestore();
+  });
+
+  it("fails closed when Source Config is unconfigured", async () => {
+    setValidEnv();
+    vi.mocked(kvs.get).mockImplementation(async (key: string) =>
+      key === SOURCE_CONFIG_KEY ? { state: "unconfigured" } : undefined,
+    );
+
+    await expect(
+      restoreAccess({
+        initiatorAccountId: "initiator-1",
+        targetUserEmail: "person@example.com",
+        selectedGroupKeys: "jira-admins",
+      }),
+    ).rejects.toThrow();
+
+    expect(api.fetch).not.toHaveBeenCalled();
   });
 });

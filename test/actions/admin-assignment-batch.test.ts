@@ -1,18 +1,11 @@
 import api from "@forge/api";
 import { kvs } from "@forge/kvs";
-import {
-  type Mock,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PartialSuccessError } from "@forge/events";
 import { computeSourceConfigFingerprint } from "../../src/config/fingerprint";
 import type { ResolvedConfig } from "../../src/config/resolved-config";
 import { parseSourceConfig } from "../../src/config/source-config";
+import type { SourceConfigRecord } from "../../src/config/source-config-store";
 import { enqueueAccessRestorationBatch } from "../../src/actions/admin-assignment-batch";
 import { logger } from "../../src/logging";
 
@@ -35,9 +28,8 @@ vi.mock("@forge/events", async (importOriginal) => {
   };
 });
 
-const kvsGetMock = kvs.get as unknown as Mock<
-  (key: string) => Promise<ResolvedConfig | undefined>
->;
+const SOURCE_CONFIG_KEY = "admin-assignment.source-config";
+const RESOLVED_CONFIG_KEY = "admin-assignment.resolved-config";
 
 const validSourceConfigJson = JSON.stringify({
   orgId: "org-1",
@@ -48,9 +40,9 @@ const validSourceConfigJson = JSON.stringify({
   ],
 });
 
-const sourceConfigFingerprint = computeSourceConfigFingerprint(
-  parseSourceConfig(validSourceConfigJson)._unsafeUnwrap(),
-);
+const sourceConfig = parseSourceConfig(validSourceConfigJson)._unsafeUnwrap();
+
+const sourceConfigFingerprint = computeSourceConfigFingerprint(sourceConfig);
 
 const jiraAdminsGroup = {
   key: "jira-admins",
@@ -64,11 +56,26 @@ const activeResolvedConfig: ResolvedConfig = {
   sourceConfigFingerprint,
   authorizedInitiatorAccountIds: ["initiator-1"],
   allowedGroups: [jiraAdminsGroup],
-  configHealth: { active: true, messages: [] },
+  configHealth: {
+    active: true,
+    messages: [],
+    validatedAt: "2026-01-01T00:00:00.000Z",
+  },
 };
 
+function seedKvs(resolvedConfig?: ResolvedConfig) {
+  const sourceConfigRecord: SourceConfigRecord = {
+    state: "configured",
+    sourceConfig,
+  };
+  vi.mocked(kvs.get).mockImplementation(async (key: string) => {
+    if (key === SOURCE_CONFIG_KEY) return sourceConfigRecord;
+    if (key === RESOLVED_CONFIG_KEY) return resolvedConfig;
+    return undefined;
+  });
+}
+
 function setValidEnv() {
-  process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = validSourceConfigJson;
   process.env.ADMIN_ASSIGNMENT_API_TOKEN = "secret-token";
 }
 
@@ -77,7 +84,7 @@ describe("enqueueAccessRestorationBatch", () => {
 
   beforeEach(() => {
     vi.mocked(api.fetch).mockReset();
-    kvsGetMock.mockReset();
+    vi.mocked(kvs.get).mockReset();
     vi.mocked(kvs.set).mockReset();
     pushMock.mockReset();
     process.env.ADMIN_ASSIGNMENT_SOURCE_CONFIG_JSON = undefined;
@@ -101,7 +108,7 @@ describe("enqueueAccessRestorationBatch", () => {
 
   it("fails closed without pushing any queue events when initiatorAccountId is not an Authorized Initiator", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
 
     await expect(
       enqueueAccessRestorationBatch({
@@ -116,7 +123,7 @@ describe("enqueueAccessRestorationBatch", () => {
 
   it("pushes one queue event per Target User Email, all sharing the same Batch ID, and returns an acknowledgment", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     pushMock.mockResolvedValueOnce({ jobId: "job-1" });
 
     const result = await enqueueAccessRestorationBatch({
@@ -151,7 +158,7 @@ describe("enqueueAccessRestorationBatch", () => {
 
   it("fails closed without pushing any queue events when targetUserEmails is missing or empty", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
 
     await expect(
       enqueueAccessRestorationBatch({
@@ -166,7 +173,7 @@ describe("enqueueAccessRestorationBatch", () => {
 
   it("chunks pushes into groups of at most 50 events when the list exceeds 50 emails", async () => {
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
     pushMock.mockResolvedValue({ jobId: "job-1" });
 
     const emails = Array.from(
@@ -190,7 +197,7 @@ describe("enqueueAccessRestorationBatch", () => {
   it("reports an accurate enqueuedCount and logs each un-enqueued email when a push partially fails", async () => {
     const logSpy = vi.spyOn(logger, "warn").mockImplementation(() => undefined);
     setValidEnv();
-    kvsGetMock.mockResolvedValueOnce(activeResolvedConfig);
+    seedKvs(activeResolvedConfig);
 
     const failedEvent = {
       errorMessage: "rate limited",
@@ -221,5 +228,22 @@ describe("enqueueAccessRestorationBatch", () => {
     const loggedText = JSON.stringify(logSpy.mock.calls);
     expect(loggedText).toContain("bob@example.com");
     logSpy.mockRestore();
+  });
+
+  it("fails closed when Source Config is unconfigured", async () => {
+    setValidEnv();
+    vi.mocked(kvs.get).mockImplementation(async (key: string) =>
+      key === SOURCE_CONFIG_KEY ? { state: "unconfigured" } : undefined,
+    );
+
+    await expect(
+      enqueueAccessRestorationBatch({
+        initiatorAccountId: "initiator-1",
+        targetUserEmails: "alice@example.com",
+        selectedGroupKeys: "jira-admins",
+      }),
+    ).rejects.toThrow();
+
+    expect(pushMock).not.toHaveBeenCalled();
   });
 });
