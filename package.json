@@ -32,7 +32,7 @@
     "lint:check": "biome lint .",
     "lint:fix": "biome lint --write .",
     "lint:forge": "forge lint",
-    "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.strict.yml",
+    "lint:prelint": "ast-grep scan --config node_modules/tool-forge-prelint-ast-grep/sgconfig.strict.yml --globs '!docs/examples/**'",
     "size": "npm run build && size-limit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
