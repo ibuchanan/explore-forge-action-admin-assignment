@@ -1,4 +1,4 @@
-import { events, invoke, view } from "@forge/bridge";
+import { events, invoke, router, view } from "@forge/bridge";
 import ForgeReconciler, {
   Box,
   ErrorMessage,
@@ -6,6 +6,7 @@ import ForgeReconciler, {
   HelperMessage,
   Inline,
   Label,
+  LinkButton,
   Lozenge,
   RequiredAsterisk,
   Stack,
@@ -40,11 +41,30 @@ function ConfigHealthIndicator() {
   // override, so it renders correctly here. Inline keeps it content-width
   // instead of stretching to the Stack's full width.
   return (
-    <Inline>
-      <Lozenge appearance={active ? "success" : "removed"}>
-        {active ? "Config: Active" : "Config: Inactive"}
-      </Lozenge>
-    </Inline>
+    <Stack space="space.050">
+      <Inline>
+        <Lozenge appearance={active ? "success" : "removed"}>
+          {active ? "Config: Active" : "Config: Inactive"}
+        </Lozenge>
+      </Inline>
+      {!active && (
+        <Inline space="space.050" alignBlock="center">
+          <Text>Admins need to</Text>
+          <LinkButton
+            appearance="link"
+            onClick={() => {
+              void router.navigate({
+                target: "module",
+                moduleKey: "admin-assignment-configure-page",
+              });
+            }}
+          >
+            configure
+          </LinkButton>
+          <Text>.</Text>
+        </Inline>
+      )}
+    </Stack>
   );
 }
 
